@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Pena Plaza</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+        }
+        h1 {
+            margin-bottom: 10px;
+        }
+        .office-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            margin-top: 24px;
+        }
+        .office-card {
+            border: 1px solid #ddd;
+            padding: 16px;
+            border-radius: 8px;
+        }
+        .status {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Welcome to Pena Plaza</h1>
+    <p>Browse our available office spaces.</p>
+
+    <div class="office-grid">
+        <div class="office-card" th:each="office : ${offices}">
+            <h3 th:text="'Office ' + ${office.officeNumber}">Office 1</h3>
+            <p th:text="'Square Feet: ' + ${office.squareFeet}">Square Feet</p>
+            <p th:text="'Monthly Rent: $' + ${office.monthlyRent}">Monthly Rent</p>
+            <p class="status" th:text="'Status: ' + ${office.status}">Status</p>
+            <p th:text="${office.description}">Description</p>
+        </div>
+    </div>
+</body>
+</html>
