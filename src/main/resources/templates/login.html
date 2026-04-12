@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Login - Pena Plaza</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            max-width: 700px;
+        }
+        h1 {
+            margin-bottom: 10px;
+        }
+        form {
+            display: grid;
+            gap: 14px;
+            margin-top: 20px;
+        }
+        input {
+            padding: 10px;
+            font-size: 16px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 6px;
+        }
+        .error {
+            background: #fdecea;
+            border: 1px solid #e57373;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+            color: #b00020;
+        }
+        .success {
+            background: #e8f5e9;
+            border: 1px solid #81c784;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+        }
+        button {
+            padding: 12px 18px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        a {
+            display: inline-block;
+            margin-top: 20px;
+            margin-right: 12px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Tenant Login</h1>
+    <p>Log in to access your Pena Plaza portal.</p>
+
+    <div class="error" th:if="${param.error}">
+        Invalid email or password.
+    </div>
+
+    <div class="success" th:if="${param.logout}">
+        You have been logged out successfully.
+    </div>
+
+    <form th:action="@{/login}" method="post">
+        <div>
+            <label for="username">Email</label>
+            <input id="username" type="email" name="username" required>
+        </div>
+
+        <div>
+            <label for="password">Password</label>
+            <input id="password" type="password" name="password" required>
+        </div>
+
+        <button type="submit">Log In</button>
+    </form>
+
+    <a th:href="@{/register}">Create Account</a>
+    <a th:href="@{/}">Back to Home</a>
+</body>
+</html>
