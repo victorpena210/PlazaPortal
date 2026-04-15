@@ -22,7 +22,18 @@
             <a th:href="@{/}" style="color: white; text-decoration: none;">Home</a>
             <a th:href="@{/register}" style="color: white; text-decoration: none;">Register</a>
             <a th:href="@{/login}" style="color: white; text-decoration: none;">Login</a>
-        </div>
+        
+			<form th:action="@{/logout}" method="post" style="margin: 0;">
+			    <button type="submit" style="
+			        background: none;
+			        border: none;
+			        color: white;
+			        cursor: pointer;
+			        font-size: 16px;
+			        padding: 0;
+			    ">Logout</button>
+			</form>	
+		</div>
     </nav>
 
 </body>

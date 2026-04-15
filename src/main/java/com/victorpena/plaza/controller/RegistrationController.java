@@ -68,7 +68,6 @@ public class RegistrationController {
         redirectAttributes.addFlashAttribute(
                 "successMessage",
                 "Account created successfully. You can log in once login is enabled.");
-
         return "redirect:/register";
     }
 }
