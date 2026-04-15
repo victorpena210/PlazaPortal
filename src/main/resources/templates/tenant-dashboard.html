@@ -8,6 +8,23 @@
     <div th:replace="~{fragments/navbar :: navbar}"></div>
 
     <h1>Tenant Dashboard</h1>
-    <p>You are logged in.</p>
+
+    <p>
+        Welcome,
+        <strong th:text="${user.firstName}">First Name</strong>
+        <span th:text="${user.lastName}">Last Name</span>
+    </p>
+
+    <p>Email: <span th:text="${user.email}">email@example.com</span></p>
+    <p>Role: <span th:text="${user.role}">TENANT</span></p>
+
+    <hr>
+
+    <h2>Quick Actions</h2>
+    <ul>
+        <li><a href="#">Pay Rent</a></li>
+        <li><a href="#">Submit Maintenance Request</a></li>
+        <li><a href="#">View Lease Details</a></li>
+    </ul>
 </body>
 </html>
