@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+    <nav th:fragment="navbar" style="
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px 24px;
+        background-color: #222;
+        color: white;
+        margin-bottom: 30px;
+        border-radius: 8px;
+    ">
+        <div>
+            <a th:href="@{/}" style="color: white; text-decoration: none; font-weight: bold; font-size: 20px;">
+                Pena Plaza
+            </a>
+        </div>
+
+        <div style="display: flex; gap: 16px; align-items: center;">
+            <a th:href="@{/}" style="color: white; text-decoration: none;">Home</a>
+            <a th:href="@{/register}" style="color: white; text-decoration: none;">Register</a>
+            <a th:href="@{/login}" style="color: white; text-decoration: none;">Login</a>
+        </div>
+    </nav>
+
+</body>
+</html>
