@@ -50,4 +50,8 @@ public class UserService {
     public List<User> findAll() {
         return userRepository.findAll();
     }
+    
+    public List<User> findTenants() {
+        return userRepository.findByRole(Role.TENANT);
+    }
 }

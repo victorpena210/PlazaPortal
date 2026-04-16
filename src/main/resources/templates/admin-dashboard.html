@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard - Pena Plaza</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+        }
+
+        h1, h2 {
+            margin-bottom: 10px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin: 24px 0 32px;
+        }
+
+        .stat-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 16px;
+            background: #f8f8f8;
+        }
+
+        .section {
+            margin-top: 36px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 12px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background: #f1f1f1;
+        }
+    </style>
+</head>
+<body>
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <h1>Admin Dashboard</h1>
+    <p>Manage offices and tenants for Pena Plaza.</p>
+
+    <div class="stats">
+        <div class="stat-card">
+            <h3>Total Offices</h3>
+            <p th:text="${totalOfficeCount}">0</p>
+        </div>
+
+        <div class="stat-card">
+            <h3>Available Offices</h3>
+            <p th:text="${availableOfficeCount}">0</p>
+        </div>
+
+        <div class="stat-card">
+            <h3>Occupied Offices</h3>
+            <p th:text="${occupiedOfficeCount}">0</p>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>All Offices</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Office Number</th>
+                    <th>Square Feet</th>
+                    <th>Monthly Rent</th>
+                    <th>Status</th>
+                    <th>Tenant</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="office : ${offices}">
+                    <td th:text="${office.officeNumber}">1</td>
+                    <td th:text="${office.squareFeet}">500</td>
+                    <td th:text="${office.monthlyRent}">$0.00</td>
+                    <td th:text="${office.status}">AVAILABLE</td>
+                    <td th:text="${office.user != null ? office.user.firstName + ' ' + office.user.lastName : 'Unassigned'}">Unassigned</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>Tenants</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="tenant : ${tenants}">
+                    <td th:text="${tenant.firstName + ' ' + tenant.lastName}">Tenant Name</td>
+                    <td th:text="${tenant.email}">tenant@email.com</td>
+                    <td th:text="${tenant.role}">TENANT</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

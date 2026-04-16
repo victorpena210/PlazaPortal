@@ -9,10 +9,17 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
+import com.victorpena.plaza.controller.CustomLoginSuccessHandler;
 import com.victorpena.plaza.service.CustomUserDetailsService;
 
 @Configuration
 public class SecurityConfig {
+
+    private final CustomLoginSuccessHandler customLoginSuccessHandler;
+
+    public SecurityConfig(CustomLoginSuccessHandler customLoginSuccessHandler) {
+        this.customLoginSuccessHandler = customLoginSuccessHandler;
+    }
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -25,7 +32,7 @@ public class SecurityConfig {
             )
             .formLogin(form -> form
                 .loginPage("/login")
-                .defaultSuccessUrl("/tenant/dashboard", true)
+                .successHandler(customLoginSuccessHandler)
                 .failureUrl("/login?error")
                 .permitAll()
             )

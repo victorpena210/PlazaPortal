@@ -24,5 +24,20 @@ public class OfficeService {
 	public List<Office> findAvailableOffices() {
 		return officeRepository.findByStatus(OfficeStatus.AVAILABLE);
 	}
-
+	
+	public List<Office> findOccupiedOffices() {
+		return officeRepository.findByStatus(OfficeStatus.AVAILABLE);
+	}
+	
+	public long countAllOffices() {
+		return officeRepository.count();
+	}
+	
+	public long countAvailableOffices() {
+		return officeRepository.findByStatus(OfficeStatus.AVAILABLE).size();
+	}
+	
+	public long countOccupiedOffices() {
+		return officeRepository.findByStatus(OfficeStatus.OCCUPIED).size();
+	}
 }
