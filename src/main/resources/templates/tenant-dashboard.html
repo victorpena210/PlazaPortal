@@ -20,6 +20,33 @@
 
     <hr>
 
+    <h2>Your Assigned Office(s)</h2>
+
+    <div th:if="${#lists.isEmpty(offices)}">
+        <p>You do not currently have any assigned offices.</p>
+    </div>
+
+    <table th:if="${!#lists.isEmpty(offices)}" border="1" cellpadding="8" cellspacing="0">
+        <thead>
+            <tr>
+                <th>Office Number</th>
+                <th>Square Feet</th>
+                <th>Monthly Rent</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="office : ${offices}">
+                <td th:text="${office.officeNumber}">101</td>
+                <td th:text="${office.squareFeet}">900</td>
+                <td th:text="${office.monthlyRent}">$1200.00</td>
+                <td th:text="${office.status}">OCCUPIED</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <hr>
+
     <h2>Quick Actions</h2>
     <ul>
         <li><a href="#">Pay Rent</a></li>
