@@ -13,4 +13,6 @@ public interface OfficeRepository extends JpaRepository<Office, Long> {
     List<Office> findByStatus(OfficeStatus status);
 
     Optional<Office> findByOfficeNumber(String officeNumber);
+    
+    List<Office> findByUserId(Long userId);
 }

@@ -46,6 +46,11 @@
         th {
             background: #f1f1f1;
         }
+
+        select, button {
+            padding: 8px;
+            margin-top: 8px;
+        }
     </style>
 </head>
 <body>
@@ -72,6 +77,40 @@
     </div>
 
     <div class="section">
+        <h2>Assign Office</h2>
+
+        <div th:if="${successMessage}" style="color: green; margin-bottom: 12px;">
+            <p th:text="${successMessage}"></p>
+        </div>
+
+        <div th:if="${errorMessage}" style="color: red; margin-bottom: 12px;">
+            <p th:text="${errorMessage}"></p>
+        </div>
+
+        <form th:action="@{/admin/offices/assign}" method="post">
+            <label for="officeId">Available Office:</label>
+            <select name="officeId" id="officeId" required>
+                <option value="" disabled selected>Select an office</option>
+                <option th:each="office : ${availableOffices}"
+                        th:value="${office.id}"
+                        th:text="${office.officeNumber + ' - $' + office.monthlyRent}">
+                </option>
+            </select>
+
+            <label for="userId" style="margin-left: 16px;">Tenant:</label>
+            <select name="userId" id="userId" required>
+                <option value="" disabled selected>Select a tenant</option>
+                <option th:each="tenant : ${tenants}"
+                        th:value="${tenant.id}"
+                        th:text="${tenant.firstName + ' ' + tenant.lastName + ' (' + tenant.email + ')'}">
+                </option>
+            </select>
+
+            <button type="submit" style="margin-left: 16px;">Assign Office</button>
+        </form>
+    </div>
+
+    <div class="section">
         <h2>All Offices</h2>
         <table>
             <thead>
@@ -81,6 +120,7 @@
                     <th>Monthly Rent</th>
                     <th>Status</th>
                     <th>Tenant</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -89,7 +129,19 @@
                     <td th:text="${office.squareFeet}">500</td>
                     <td th:text="${office.monthlyRent}">$0.00</td>
                     <td th:text="${office.status}">AVAILABLE</td>
-                    <td th:text="${office.user != null ? office.user.firstName + ' ' + office.user.lastName : 'Unassigned'}">Unassigned</td>
+                    <td th:text="${office.user != null ? office.user.firstName + ' ' + office.user.lastName : 'Unassigned'}">
+                        Unassigned
+                    </td>
+                    <td>
+                        <form th:if="${office.user != null}"
+                              th:action="@{/admin/offices/{officeId}/unassign(officeId=${office.id})}"
+                              method="post"
+                              style="display:inline;">
+                            <button type="submit">Unassign</button>
+                        </form>
+
+                        <span th:if="${office.user == null}">—</span>
+                    </td>
                 </tr>
             </tbody>
         </table>

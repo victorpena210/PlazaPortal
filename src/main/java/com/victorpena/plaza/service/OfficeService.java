@@ -6,15 +6,20 @@ import org.springframework.stereotype.Service;
 
 import com.victorpena.plaza.model.Office;
 import com.victorpena.plaza.model.OfficeStatus;
+import com.victorpena.plaza.model.Role;
+import com.victorpena.plaza.model.User;
 import com.victorpena.plaza.repository.OfficeRepository;
+import com.victorpena.plaza.repository.UserRepository;
 
 @Service
 public class OfficeService {
 	
 	private final OfficeRepository officeRepository;
+	private final UserRepository userRepository;
 	
-	public OfficeService(OfficeRepository officeRepository) {
+	public OfficeService(OfficeRepository officeRepository, UserRepository userRepository) {
 		this.officeRepository = officeRepository;
+		this.userRepository = userRepository;
 	}
 	
 	public List<Office> findAll() {
@@ -26,7 +31,11 @@ public class OfficeService {
 	}
 	
 	public List<Office> findOccupiedOffices() {
-		return officeRepository.findByStatus(OfficeStatus.AVAILABLE);
+		return officeRepository.findByStatus(OfficeStatus.OCCUPIED);
+	}
+	
+	public List<Office> findByUserId(Long userId) {
+		return officeRepository.findByUserId(userId);
 	}
 	
 	public long countAllOffices() {
@@ -39,5 +48,40 @@ public class OfficeService {
 	
 	public long countOccupiedOffices() {
 		return officeRepository.findByStatus(OfficeStatus.OCCUPIED).size();
+	}
+	
+	public void assignOfficeToTenant(Long officeId, Long userId) {
+		Office office = officeRepository.findById(officeId)
+				.orElseThrow(() -> new IllegalArgumentException("Office not found: " + officeId));
+		
+		User user = userRepository.findById(userId)
+				.orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
+		
+		if (user.getRole() != Role.TENANT) {
+			throw new IllegalArgumentException("Only tenants can be assigned to offices.");
+		}
+		
+		if (office.getStatus() == OfficeStatus.MAINTENANCE) {
+			throw new IllegalArgumentException("Office in maintenance cannot be assigned.");
+		}
+		
+		if (office.getUser() != null || office.getStatus() == OfficeStatus.OCCUPIED) {
+			throw new IllegalArgumentException("Office is already assigned.");
+		}
+		
+		office.setUser(user);
+		office.setStatus(OfficeStatus.OCCUPIED);
+		
+		officeRepository.save(office);
+	}
+	
+	public void unassignOffice(Long officeId) {
+		Office office = officeRepository.findById(officeId)
+				.orElseThrow(() -> new IllegalArgumentException("Office not found: " + officeId));
+		
+		office.setUser(null);
+		office.setStatus(OfficeStatus.AVAILABLE);
+		
+		officeRepository.save(office);
 	}
 }
