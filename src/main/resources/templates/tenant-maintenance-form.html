@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Submit Maintenance Request - Pena Plaza</title>
+</head>
+<body>
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <h1>Submit Maintenance Request</h1>
+
+    <div th:if="${#lists.isEmpty(offices)}">
+        <p>You do not have any assigned offices, so you cannot submit a maintenance request yet.</p>
+    </div>
+
+    <form th:if="${!#lists.isEmpty(offices)}"
+          th:action="@{/tenant/maintenance}"
+          method="post">
+
+        <div>
+            <label for="officeId">Office</label>
+            <select id="officeId" name="officeId" required>
+                <option value="" disabled selected>Select your office</option>
+                <option th:each="office : ${offices}"
+                        th:value="${office.id}"
+                        th:text="${office.officeNumber + ' - ' + office.status}">
+                </option>
+            </select>
+        </div>
+
+        <div style="margin-top: 12px;">
+            <label for="title">Issue Title</label>
+            <input type="text" id="title" name="title" required>
+        </div>
+
+        <div style="margin-top: 12px;">
+            <label for="description">Description</label><br>
+            <textarea id="description" name="description" rows="6" cols="50" required></textarea>
+        </div>
+
+        <div style="margin-top: 12px;">
+            <button type="submit">Submit Request</button>
+        </div>
+    </form>
+</body>
+</html>
