@@ -8,6 +8,13 @@
     <div th:replace="~{fragments/navbar :: navbar}"></div>
 
     <h1>Tenant Dashboard</h1>
+	<div th:if="${successMessage}" style="color: green; margin-bottom: 12px;">
+	    <p th:text="${successMessage}"></p>
+	</div>
+
+	<div th:if="${errorMessage}" style="color: red; margin-bottom: 12px;">
+	    <p th:text="${errorMessage}"></p>
+	</div>
 
     <p>
         Welcome,
@@ -50,8 +57,36 @@
     <h2>Quick Actions</h2>
     <ul>
         <li><a href="#">Pay Rent</a></li>
-        <li><a href="#">Submit Maintenance Request</a></li>
-        <li><a href="#">View Lease Details</a></li>
+		<li><a th:href="@{/tenant/maintenance/new}">Submit Maintenance Request</a></li>        <li><a href="#">View Lease Details</a></li>
     </ul>
+	
+	<hr>
+
+	<h2>Your Maintenance Requests</h2>
+
+	<div th:if="${#lists.isEmpty(requests)}">
+	    <p>You have not submitted any maintenance requests yet.</p>
+	</div>
+
+	<table th:if="${!#lists.isEmpty(requests)}" border="1" cellpadding="8" cellspacing="0">
+	    <thead>
+	        <tr>
+	            <th>Created</th>
+	            <th>Office</th>
+	            <th>Title</th>
+	            <th>Description</th>
+	            <th>Status</th>
+	        </tr>
+	    </thead>
+	    <tbody>
+	        <tr th:each="request : ${requests}">
+	            <td th:text="${request.createdAt}">2026-04-21T10:00</td>
+	            <td th:text="${request.office.officeNumber}">101</td>
+	            <td th:text="${request.title}">AC not cooling</td>
+	            <td th:text="${request.description}">Warm air coming out</td>
+	            <td th:text="${request.status}">OPEN</td>
+	        </tr>
+	    </tbody>
+	</table>
 </body>
 </html>

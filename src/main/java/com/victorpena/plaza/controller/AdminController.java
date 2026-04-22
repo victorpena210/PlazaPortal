@@ -8,7 +8,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
+import com.victorpena.plaza.model.MaintenanceRequestStatus;
+import com.victorpena.plaza.service.MaintenanceRequestService;
 import com.victorpena.plaza.service.OfficeService;
 import com.victorpena.plaza.service.UserService;
 
@@ -18,11 +19,13 @@ public class AdminController {
 	
 	private final OfficeService officeService;
 	private final UserService userService;
+	private final MaintenanceRequestService maintenanceRequestService;
 
 	
-	public AdminController(OfficeService officeService, UserService userService) {
+	public AdminController(OfficeService officeService, UserService userService, MaintenanceRequestService maintenanceRequestService) {
 		this.officeService = officeService;
 		this.userService = userService;
+		this.maintenanceRequestService = maintenanceRequestService;
 	}
 	
 	@GetMapping("/dashboard")
@@ -65,5 +68,27 @@ public class AdminController {
 
 		return "redirect:/admin/dashboard";
 	}
+	
+	@GetMapping("/maintenance")
+	public String maintenanceRequests(Model model) {
+		model.addAttribute("requests", maintenanceRequestService.findAll());
+		return "admin-maintenance-requests";
+	}
+	
+	@PostMapping("/maintenance/{requestId}/status")
+	public String updateMaintenanceStatus(
+			@PathVariable Long requestId,
+			@RequestParam MaintenanceRequestStatus status,
+			RedirectAttributes redirectAttributes) {
+		try {
+			maintenanceRequestService.updateStatus(requestId, status);
+			redirectAttributes.addFlashAttribute("successMessage", "Maintenance request updated successfuly.");
+		} catch (IllegalArgumentException e) {
+			redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+		}
+		
+		return "redirect:/admin/maintenance";
+	}
+	
 	
 }

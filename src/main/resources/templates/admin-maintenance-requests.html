@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Maintenance Requests - Pena Plaza</title>
+</head>
+<body>
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <h1>Maintenance Requests</h1>
+
+    <div th:if="${successMessage}" style="color: green; margin-bottom: 12px;">
+        <p th:text="${successMessage}"></p>
+    </div>
+
+    <div th:if="${errorMessage}" style="color: red; margin-bottom: 12px;">
+        <p th:text="${errorMessage}"></p>
+    </div>
+
+    <div th:if="${#lists.isEmpty(requests)}">
+        <p>No maintenance requests have been submitted yet.</p>
+    </div>
+
+    <table th:if="${!#lists.isEmpty(requests)}" border="1" cellpadding="8" cellspacing="0">
+        <thead>
+            <tr>
+                <th>Created</th>
+                <th>Office</th>
+                <th>Tenant</th>
+                <th>Title</th>
+                <th>Description</th>
+                <th>Status</th>
+                <th>Update Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="request : ${requests}">
+                <td th:text="${request.createdAt}">2026-04-21T10:00</td>
+                <td th:text="${request.office.officeNumber}">101</td>
+                <td th:text="${request.user.firstName + ' ' + request.user.lastName}">John Smith</td>
+                <td th:text="${request.title}">AC not cooling</td>
+                <td th:text="${request.description}">Warm air coming out</td>
+                <td th:text="${request.status}">OPEN</td>
+                <td>
+                    <form th:action="@{/admin/maintenance/{requestId}/status(requestId=${request.id})}" method="post">
+                        <select name="status">
+                            <option value="OPEN" th:selected="${request.status.name() == 'OPEN'}">OPEN</option>
+                            <option value="IN_PROGRESS" th:selected="${request.status.name() == 'IN_PROGRESS'}">IN_PROGRESS</option>
+                            <option value="COMPLETED" th:selected="${request.status.name() == 'COMPLETED'}">COMPLETED</option>
+                        </select>
+                        <button type="submit">Update</button>
+                    </form>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+</html>
