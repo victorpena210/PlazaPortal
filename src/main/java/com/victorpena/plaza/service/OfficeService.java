@@ -38,6 +38,10 @@ public class OfficeService {
 		return officeRepository.findByUserId(userId);
 	}
 	
+	public List<Office> findMaintenanceOffices() {
+	    return officeRepository.findByStatus(OfficeStatus.MAINTENANCE);
+	}
+	
 	public long countAllOffices() {
 		return officeRepository.count();
 	}
@@ -48,6 +52,10 @@ public class OfficeService {
 	
 	public long countOccupiedOffices() {
 		return officeRepository.findByStatus(OfficeStatus.OCCUPIED).size();
+	}
+	
+	public long countMaintenanceOffices() {
+	    return officeRepository.findByStatus(OfficeStatus.MAINTENANCE).size();
 	}
 	
 	public void assignOfficeToTenant(Long officeId, Long userId) {
@@ -84,4 +92,31 @@ public class OfficeService {
 		
 		officeRepository.save(office);
 	}
+	
+	public void markOfficeAsMaintenance(Long officeId) {
+		Office office = officeRepository.findById(officeId)
+				.orElseThrow(() -> new IllegalArgumentException("Office not found: " + officeId));
+		if(office.getUser() != null || office.getStatus() == OfficeStatus.OCCUPIED) {
+			throw new IllegalArgumentException("Occupied office cannot be marked as maintenance.");
+		}
+		
+		office.setStatus(OfficeStatus.MAINTENANCE);
+		officeRepository.save(office);
+	}
+	
+	public void markOfficeAsAvailable(Long officeId) {
+	    Office office = officeRepository.findById(officeId)
+	            .orElseThrow(() -> new IllegalArgumentException("Office not found: " + officeId));
+
+	    if (office.getUser() != null) {
+	        throw new IllegalArgumentException("Assigned office cannot be marked as available manually.");
+	    }
+
+	    office.setStatus(OfficeStatus.AVAILABLE);
+	    officeRepository.save(office);
+	}
+	
+
+	
+	
 }

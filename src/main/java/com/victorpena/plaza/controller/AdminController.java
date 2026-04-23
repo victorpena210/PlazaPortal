@@ -35,6 +35,8 @@ public class AdminController {
 	    model.addAttribute("availableOffices", officeService.findAvailableOffices());
 		model.addAttribute("availableOfficeCount", officeService.countAvailableOffices());
 		model.addAttribute("occupiedOfficeCount", officeService.countOccupiedOffices());
+		model.addAttribute("maintenanceOffices", officeService.findMaintenanceOffices());
+	    model.addAttribute("maintenanceOfficeCount", officeService.countMaintenanceOffices());
 		model.addAttribute("totalOfficeCount", officeService.countAllOffices());
 		
 		return "admin-dashboard";
@@ -89,6 +91,34 @@ public class AdminController {
 		
 		return "redirect:/admin/maintenance";
 	}
+	
+	@PostMapping("/offices/{officeId}/maintenance")
+	public String markOfficeAsMaintenance(
+			@PathVariable Long officeId, RedirectAttributes redirectAttributes) {
+		try {
+			officeService.markOfficeAsMaintenance(officeId);
+			redirectAttributes.addFlashAttribute("successMessage", "Office marked as maintenace.");
+		} catch (IllegalArgumentException e) {
+			redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+		}
+		
+		return "redirect:/admin/dashboard";
+	}
+	
+	@PostMapping("/offices/{officeId}/available")
+	public String markOfficeAsAvailable(
+	        @PathVariable Long officeId,
+	        RedirectAttributes redirectAttributes) {
+	    try {
+	        officeService.markOfficeAsAvailable(officeId);
+	        redirectAttributes.addFlashAttribute("successMessage", "Office marked as available.");
+	    } catch (IllegalArgumentException e) {
+	        redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+	    }
+
+	    return "redirect:/admin/dashboard";
+	}
+	
 	
 	
 }
