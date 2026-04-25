@@ -13,4 +13,5 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 	List<Payment> findByUserIdOrderByPaidAtDesc(Long userId);
 	
 	List<Payment> findAllByOrderByPaidAtDesc();
-}
+	
+	boolean existsByOfficeIdAndPaymentMonth(Long officeId, String paymentMonth);}

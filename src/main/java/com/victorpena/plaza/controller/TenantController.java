@@ -46,6 +46,7 @@ public class TenantController {
         model.addAttribute("requests", maintenanceRequestService.findByUserId(user.getId()));
         model.addAttribute("user", user);
         model.addAttribute("offices", offices);
+        model.addAttribute("payments", paymentService.findByUserId(user.getId()));
 
         return "tenant-dashboard";
     }
@@ -101,15 +102,14 @@ public class TenantController {
     }
     
     @PostMapping("/payments")
-    public String submitPayment(Authentication authentication, @RequestParam Long officeId, RedirectAttributes redirectAttributes) {
+    public String submitPayment(Authentication authentication, @RequestParam Long officeId, @RequestParam String paymentMonth, RedirectAttributes redirectAttributes) {
     	String email = authentication.getName();
     	
     	User user = userService.findByEmail(email)
     			.orElseThrow(() -> new IllegalArgumentException("User not found: " + email));
     	
     	try {
-    		paymentService.createPayment(user.getId(), officeId);
-    		redirectAttributes.addFlashAttribute("successMessage", "Rent payment submitted successfully.");
+    		paymentService.createPayment(user.getId(), officeId, paymentMonth);    		redirectAttributes.addFlashAttribute("successMessage", "Rent payment submitted successfully.");
     	} catch (IllegalArgumentException e) {
     		redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
     	}

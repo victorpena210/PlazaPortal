@@ -1,5 +1,6 @@
 package com.victorpena.plaza.service;
 
+import java.time.YearMonth;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -29,7 +30,7 @@ public class PaymentService {
         this.officeRepository = officeRepository;
     }
 
-    public Payment createPayment(Long userId, Long officeId) {
+    public Payment createPayment(Long userId, Long officeId, String paymentMonth) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
 
@@ -40,15 +41,19 @@ public class PaymentService {
             throw new IllegalArgumentException("You can only pay for your assigned office.");
         }
 
+        if (paymentRepository.existsByOfficeIdAndPaymentMonth(officeId, paymentMonth)) {
+            throw new IllegalArgumentException("Rent has already been paid for this office for " + paymentMonth + ".");
+        }
+
         Payment payment = new Payment();
         payment.setUser(user);
         payment.setOffice(office);
         payment.setAmount(office.getMonthlyRent());
+        payment.setPaymentMonth(paymentMonth);
         payment.setStatus(PaymentStatus.PAID);
 
         return paymentRepository.save(payment);
     }
-
     public List<Payment> findByUserId(Long userId) {
         return paymentRepository.findByUserIdOrderByPaidAtDesc(userId);
     }
