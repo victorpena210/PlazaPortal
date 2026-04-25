@@ -11,6 +11,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.victorpena.plaza.model.MaintenanceRequestStatus;
 import com.victorpena.plaza.service.MaintenanceRequestService;
 import com.victorpena.plaza.service.OfficeService;
+import com.victorpena.plaza.service.PaymentService;
 import com.victorpena.plaza.service.UserService;
 
 @Controller
@@ -20,12 +21,14 @@ public class AdminController {
 	private final OfficeService officeService;
 	private final UserService userService;
 	private final MaintenanceRequestService maintenanceRequestService;
+	private final PaymentService paymentService;
 
 	
-	public AdminController(OfficeService officeService, UserService userService, MaintenanceRequestService maintenanceRequestService) {
+	public AdminController(OfficeService officeService, UserService userService, MaintenanceRequestService maintenanceRequestService, PaymentService paymentService) {
 		this.officeService = officeService;
 		this.userService = userService;
 		this.maintenanceRequestService = maintenanceRequestService;
+		this.paymentService = paymentService;
 	}
 	
 	@GetMapping("/dashboard")
@@ -119,6 +122,11 @@ public class AdminController {
 	    return "redirect:/admin/dashboard";
 	}
 	
+	@GetMapping("/payments")
+	public String payments(Model model) {
+	    model.addAttribute("payments", paymentService.findAll());
+	    return "admin-payments";
+	}
 	
 	
 }

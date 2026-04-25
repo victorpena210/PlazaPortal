@@ -6,6 +6,7 @@ import com.victorpena.plaza.model.Office;
 import com.victorpena.plaza.model.User;
 import com.victorpena.plaza.service.MaintenanceRequestService;
 import com.victorpena.plaza.service.OfficeService;
+import com.victorpena.plaza.service.PaymentService;
 import com.victorpena.plaza.service.UserService;
 
 import org.springframework.security.core.Authentication;
@@ -24,11 +25,13 @@ public class TenantController {
     private final UserService userService;
     private final OfficeService officeService;
     private final MaintenanceRequestService maintenanceRequestService;
+    private final PaymentService paymentService;
 
-    public TenantController(UserService userService, OfficeService officeService, MaintenanceRequestService maintenanceRequestService) {
+    public TenantController(UserService userService, OfficeService officeService, MaintenanceRequestService maintenanceRequestService, PaymentService paymentService) {
         this.userService = userService;
         this.officeService = officeService;
         this.maintenanceRequestService = maintenanceRequestService;
+        this.paymentService = paymentService;
     }
 
     @GetMapping("/dashboard")
@@ -81,5 +84,35 @@ public class TenantController {
         }
 
         return "redirect:/tenant/dashboard";
+    }
+    
+    @GetMapping("/payments/new")
+    public String showPaymentForm(Authentication authentication, Model model) {
+    	String email = authentication.getName();
+    	User user = userService.findByEmail(email)
+    			.orElseThrow(() -> new IllegalArgumentException("User not found: " + email));
+    	
+    	model.addAttribute("user", user);
+    	model.addAttribute("offices", officeService.findByUserId(user.getId()));
+    	model.addAttribute("payments", paymentService.findByUserId(user.getId()));
+    	
+    	return "tenant-payment-form";
+    	
+    }
+    
+    @PostMapping("/payments")
+    public String submitPayment(Authentication authentication, @RequestParam Long officeId, RedirectAttributes redirectAttributes) {
+    	String email = authentication.getName();
+    	
+    	User user = userService.findByEmail(email)
+    			.orElseThrow(() -> new IllegalArgumentException("User not found: " + email));
+    	
+    	try {
+    		paymentService.createPayment(user.getId(), officeId);
+    		redirectAttributes.addFlashAttribute("successMessage", "Rent payment submitted successfully.");
+    	} catch (IllegalArgumentException e) {
+    		redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+    	}
+    	return "redirect:/tenant/dashboard";
     }
 }

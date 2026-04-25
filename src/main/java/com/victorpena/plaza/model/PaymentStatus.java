@@ -1,5 +1,7 @@
 package com.victorpena.plaza.model;
 
-public class PaymentStatus {
-
+public enum PaymentStatus {
+	PENDING,
+	PAID,
+	FAILED
 }
