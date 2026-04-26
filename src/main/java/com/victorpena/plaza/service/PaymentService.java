@@ -31,6 +31,10 @@ public class PaymentService {
     }
 
     public Payment createPayment(Long userId, Long officeId, String paymentMonth) {
+        if (paymentMonth == null || paymentMonth.isBlank()) {
+            throw new IllegalArgumentException("Payment month is required.");
+        }
+
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
 
@@ -54,6 +58,7 @@ public class PaymentService {
 
         return paymentRepository.save(payment);
     }
+    
     public List<Payment> findByUserId(Long userId) {
         return paymentRepository.findByUserIdOrderByPaidAtDesc(userId);
     }

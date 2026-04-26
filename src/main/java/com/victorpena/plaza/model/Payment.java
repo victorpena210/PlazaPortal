@@ -1,5 +1,4 @@
 package com.victorpena.plaza.model;
-import java.time.YearMonth;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
@@ -40,11 +39,10 @@ public class Payment {
 	
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
 	@JoinColumn(name = "office_id", nullable = false)
-	
+	private Office office;
+
 	@Column(name = "payment_month", nullable = false, length = 7)
 	private String paymentMonth;
-	
-	private Office office;
 	
 	public Payment() {
 		

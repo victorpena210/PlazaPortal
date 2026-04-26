@@ -21,6 +21,7 @@
                 <th>Office</th>
                 <th>Amount</th>
                 <th>Status</th>
+				<th>Rent Month</th>
             </tr>
         </thead>
         <tbody>
@@ -30,6 +31,7 @@
                 <td th:text="${payment.office.officeNumber}">101</td>
                 <td th:text="${payment.amount}">$1200.00</td>
                 <td th:text="${payment.status}">PAID</td>
+				<td th:text="${payment.paymentMonth}">2026-04</td>
             </tr>
         </tbody>
     </table>
