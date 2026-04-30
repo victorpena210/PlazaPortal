@@ -19,7 +19,7 @@
     </div>
 
     <form th:if="${!#lists.isEmpty(offices)}"
-          th:action="@{/tenant/payments}"
+          th:action="@{/tenant/payments/checkout}"
           method="post">
         <label for="officeId">Select Office:</label>
         <select name="officeId" id="officeId" required>
@@ -64,5 +64,9 @@
             </tr>
         </tbody>
     </table>
+	
+	<p th:if="${#lists.isEmpty(payments)}">
+	    No payment history yet.
+	</p>
 </body>
 </html>

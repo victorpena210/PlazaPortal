@@ -1,7 +1,6 @@
 package com.victorpena.plaza.service;
 
-import java.time.YearMonth;
-import java.math.BigDecimal;
+
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -54,7 +53,7 @@ public class PaymentService {
         payment.setOffice(office);
         payment.setAmount(office.getMonthlyRent());
         payment.setPaymentMonth(paymentMonth);
-        payment.setStatus(PaymentStatus.PAID);
+        payment.setStatus(PaymentStatus.DUE);
 
         return paymentRepository.save(payment);
     }
@@ -65,5 +64,19 @@ public class PaymentService {
 
     public List<Payment> findAll() {
         return paymentRepository.findAllByOrderByPaidAtDesc();
+    }
+    
+    public Payment markPaymentAsPaid(String stripeSessionId) {
+    	Payment payment = paymentRepository.findByStripeSessionId(stripeSessionId)
+    			.orElseThrow(() -> new IllegalArgumentException("payment not found for Stripe session"));
+    	payment.setStatus(PaymentStatus.PAID);
+    	return paymentRepository.save(payment);
+    }
+    
+    public Payment attachStripeSession(Long paymentId, String stripeSessionId) {
+    	Payment payment = paymentRepository.findById(paymentId)
+    			.orElseThrow(() -> new IllegalArgumentException("payment not found: " + paymentId));
+    	payment.setStripeSessionId(stripeSessionId);
+    	return paymentRepository.save(payment);
     }
 }

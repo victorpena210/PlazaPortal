@@ -44,6 +44,9 @@ public class Payment {
 	@Column(name = "payment_month", nullable = false, length = 7)
 	private String paymentMonth;
 	
+	@Column(name = "stripe_session_id")
+	private String stripeSessionId;
+	
 	public Payment() {
 		
 	}
@@ -109,6 +112,14 @@ public class Payment {
 
 	public void setPaymentMonth(String paymentMonth) {
 	    this.paymentMonth = paymentMonth;
+	}
+
+	public String getStripeSessionId() {
+		return stripeSessionId;
+	}
+
+	public void setStripeSessionId(String stripeSessionId) {
+		this.stripeSessionId = stripeSessionId;
 	}
 	
 	
