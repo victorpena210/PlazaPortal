@@ -30,6 +30,9 @@ public class Payment {
 	@Column(nullable = false, length = 20)
 	private PaymentStatus status;
 	
+	@Column(name = "created_at", nullable = false)
+	private LocalDateTime createdAt;
+	
 	@Column(name = "paid_at", nullable = false)
 	private LocalDateTime paidAt;
 	
@@ -53,9 +56,9 @@ public class Payment {
 	
 	@PrePersist
 	public void prePersist() {
-		if(paidAt == null) {
-			paidAt = LocalDateTime.now();
-		}
+	    if (createdAt == null) {
+	        createdAt = LocalDateTime.now();
+	    }
 	}
 
 	public Long getId() {
@@ -120,6 +123,14 @@ public class Payment {
 
 	public void setStripeSessionId(String stripeSessionId) {
 		this.stripeSessionId = stripeSessionId;
+	}
+
+	public LocalDateTime getCreatedAt() {
+		return createdAt;
+	}
+
+	public void setCreatedAt(LocalDateTime createdAt) {
+		this.createdAt = createdAt;
 	}
 	
 	

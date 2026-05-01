@@ -1,6 +1,6 @@
 package com.victorpena.plaza.service;
 
-
+import com.victorpena.plaza.model.PaymentStatus;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -45,8 +45,12 @@ public class PaymentService {
             throw new IllegalArgumentException("You can only pay for your assigned office.");
         }
 
-        if (paymentRepository.existsByOfficeIdAndPaymentMonth(officeId, paymentMonth)) {
-            throw new IllegalArgumentException("Rent has already been paid for this office for " + paymentMonth + ".");
+        if (paymentRepository.existsByOfficeIdAndPaymentMonthAndStatus(
+                officeId,
+                paymentMonth,
+                PaymentStatus.PAID
+        )) {
+            throw new IllegalArgumentException("Rent for this office and month has already been paid.");
         }
 
         Payment payment = new Payment();
@@ -61,6 +65,7 @@ public class PaymentService {
     
     public List<Payment> findByUserId(Long userId) {
     	return paymentRepository.findByUserIdOrderByCreatedAtDesc(userId);
+    }
     public List<Payment> findAll() {
     	return paymentRepository.findAllByOrderByCreatedAtDesc();    }
     
