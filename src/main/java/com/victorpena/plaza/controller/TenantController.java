@@ -101,18 +101,4 @@ public class TenantController {
     	
     }
     
-    @PostMapping("/payments")
-    public String submitPayment(Authentication authentication, @RequestParam Long officeId, @RequestParam String paymentMonth, RedirectAttributes redirectAttributes) {
-    	String email = authentication.getName();
-    	
-    	User user = userService.findByEmail(email)
-    			.orElseThrow(() -> new IllegalArgumentException("User not found: " + email));
-    	
-    	try {
-    		paymentService.createPayment(user.getId(), officeId, paymentMonth);    		redirectAttributes.addFlashAttribute("successMessage", "Rent payment submitted successfully.");
-    	} catch (IllegalArgumentException e) {
-    		redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-    	}
-    	return "redirect:/tenant/dashboard";
-    }
 }
