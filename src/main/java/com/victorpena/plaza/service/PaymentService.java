@@ -1,6 +1,7 @@
 package com.victorpena.plaza.service;
 
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -59,17 +60,15 @@ public class PaymentService {
     }
     
     public List<Payment> findByUserId(Long userId) {
-        return paymentRepository.findByUserIdOrderByPaidAtDesc(userId);
-    }
-
+    	return paymentRepository.findByUserIdOrderByCreatedAtDesc(userId);
     public List<Payment> findAll() {
-        return paymentRepository.findAllByOrderByPaidAtDesc();
-    }
+    	return paymentRepository.findAllByOrderByCreatedAtDesc();    }
     
     public Payment markPaymentAsPaid(String stripeSessionId) {
     	Payment payment = paymentRepository.findByStripeSessionId(stripeSessionId)
     			.orElseThrow(() -> new IllegalArgumentException("payment not found for Stripe session"));
     	payment.setStatus(PaymentStatus.PAID);
+    	payment.setPaidAt(LocalDateTime.now());
     	return paymentRepository.save(payment);
     }
     

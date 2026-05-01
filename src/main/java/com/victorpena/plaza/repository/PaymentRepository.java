@@ -9,8 +9,8 @@ import com.victorpena.plaza.model.Payment;
 
 public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
-	List<Payment> findByUserIdOrderByPaidAtDesc(Long userId);
-    List<Payment> findAllByOrderByPaidAtDesc();
+	List<Payment> findByUserIdOrderByCreatedAtDesc(Long userId);
+	List<Payment> findAllByOrderByCreatedAtDesc();
 
     boolean existsByOfficeIdAndPaymentMonth(Long officeId, String paymentMonth);
     
