@@ -64,17 +64,21 @@ public class PaymentService {
     }
     
     public List<Payment> findByUserId(Long userId) {
-    	return paymentRepository.findByUserIdOrderByCreatedAtDesc(userId);
+        return paymentRepository.findByUserIdOrderByCreatedAtDesc(userId);
     }
+
     public List<Payment> findAll() {
-    	return paymentRepository.findAllByOrderByCreatedAtDesc();    }
+        return paymentRepository.findAllByOrderByCreatedAtDesc();
+    }
     
     public Payment markPaymentAsPaid(String stripeSessionId) {
-    	Payment payment = paymentRepository.findByStripeSessionId(stripeSessionId)
-    			.orElseThrow(() -> new IllegalArgumentException("payment not found for Stripe session"));
-    	payment.setStatus(PaymentStatus.PAID);
-    	payment.setPaidAt(LocalDateTime.now());
-    	return paymentRepository.save(payment);
+        Payment payment = paymentRepository.findByStripeSessionId(stripeSessionId)
+                .orElseThrow(() -> new IllegalArgumentException("Payment not found for Stripe session"));
+
+        payment.setStatus(PaymentStatus.PAID);
+        payment.setPaidAt(LocalDateTime.now());
+
+        return paymentRepository.save(payment);
     }
     
     public Payment attachStripeSession(Long paymentId, String stripeSessionId) {

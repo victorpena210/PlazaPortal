@@ -33,7 +33,8 @@ public class Payment {
 	@Column(name = "created_at", nullable = false)
 	private LocalDateTime createdAt;
 	
-	@Column(name = "paid_at", nullable = false)
+
+	@Column(name = "paid_at")
 	private LocalDateTime paidAt;
 	
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)

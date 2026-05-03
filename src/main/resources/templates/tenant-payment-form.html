@@ -47,8 +47,8 @@
     <table th:if="${!#lists.isEmpty(payments)}" border="1" cellpadding="8" cellspacing="0">
         <thead>
             <tr>
-                <th>Paid At</th>
-                <th>Office</th>
+				<th>Created At</th>
+				<th>Paid At</th>                <th>Office</th>
                 <th>Amount</th>
                 <th>Status</th>
 				<th>Rent Month</th>
@@ -56,8 +56,8 @@
         </thead>
         <tbody>
             <tr th:each="payment : ${payments}">
-                <td th:text="${payment.paidAt}">2026-04-23T10:00</td>
-                <td th:text="${payment.office.officeNumber}">101</td>
+				<td th:text="${payment.createdAt}">2026-04-23T10:00</td>
+				<td th:text="${payment.paidAt != null ? payment.paidAt : 'Not paid yet'}">Not paid yet</td>                <td th:text="${payment.office.officeNumber}">101</td>
                 <td th:text="${payment.amount}">$1200.00</td>
                 <td th:text="${payment.status}">PAID</td>
 				<td th:text="${payment.paymentMonth}">2026-04</td>
