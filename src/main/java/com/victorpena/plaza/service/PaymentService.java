@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 
 import com.victorpena.plaza.model.Office;
 import com.victorpena.plaza.model.Payment;
-import com.victorpena.plaza.model.PaymentStatus;
 import com.victorpena.plaza.model.User;
 import com.victorpena.plaza.repository.OfficeRepository;
 import com.victorpena.plaza.repository.PaymentRepository;
@@ -50,7 +49,8 @@ public class PaymentService {
                 paymentMonth,
                 PaymentStatus.PAID
         )) {
-            throw new IllegalArgumentException("Rent for this office and month has already been paid.");
+            throw new IllegalArgumentException("Rent has already been paid for this office for " + paymentMonth + "."
+);
         }
 
         Payment payment = new Payment();
