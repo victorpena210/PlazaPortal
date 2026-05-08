@@ -17,21 +17,24 @@
         <thead>
             <tr>
 				<th>Created At</th>
-				<th>Paid At</th>                <th>Tenant</th>
-                <th>Office</th>
-                <th>Amount</th>
-                <th>Status</th>
+				<th>Paid At</th>
+				<th>Tenant</th>
+				<th>Office</th>
+				<th>Amount</th>
+				<th>Status</th>
 				<th>Rent Month</th>
             </tr>
         </thead>
         <tbody>
-            <tr th:each="payment : ${payments}">
-				<td th:text="${payment.createdAt}">2026-04-23T10:00</td>
-				<td th:text="${payment.paidAt != null ? payment.paidAt : 'Not paid yet'}">Not paid yet</td>                <td th:text="${payment.office.officeNumber}">101</td>
-                <td th:text="${payment.amount}">$1200.00</td>
-                <td th:text="${payment.status}">PAID</td>
-				<td th:text="${payment.paymentMonth}">2026-04</td>
-            </tr>
+			<tr th:each="payment : ${payments}">
+			    <td th:text="${payment.createdAt}">2026-04-23T10:00</td>
+			    <td th:text="${payment.paidAt != null ? payment.paidAt : 'Not paid yet'}">Not paid yet</td>
+			    <td th:text="${payment.user.firstName + ' ' + payment.user.lastName}">Tenant Name</td>
+			    <td th:text="${payment.office.officeNumber}">101</td>
+			    <td th:text="${payment.amount}">$1200.00</td>
+			    <td th:text="${payment.status}">PAID</td>
+			    <td th:text="${payment.paymentMonth}">2026-04</td>
+			</tr>
         </tbody>
     </table>
 </body>

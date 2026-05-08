@@ -21,6 +21,7 @@
     <form th:if="${!#lists.isEmpty(offices)}"
           th:action="@{/tenant/payments/checkout}"
           method="post">
+
         <label for="officeId">Select Office:</label>
         <select name="officeId" id="officeId" required>
             <option value="" disabled selected>Select an office</option>
@@ -29,9 +30,9 @@
                     th:text="${office.officeNumber + ' - $' + office.monthlyRent}">
             </option>
         </select>
-		
-		<label for="paymentMonth">Payment Month:</label>
-		<input type="month" id="paymentMonth" name="paymentMonth" required>
+
+        <label for="paymentMonth">Payment Month:</label>
+        <input type="month" id="paymentMonth" name="paymentMonth" required>
 
         <button type="submit">Continue to Stripe</button>
     </form>
@@ -39,7 +40,7 @@
     <hr>
 
     <h2>Your Payment History</h2>
- 
+
     <div th:if="${#lists.isEmpty(payments)}">
         <p>You have not made any payments yet.</p>
     </div>
@@ -47,26 +48,24 @@
     <table th:if="${!#lists.isEmpty(payments)}" border="1" cellpadding="8" cellspacing="0">
         <thead>
             <tr>
-				<th>Created At</th>
-				<th>Paid At</th>                <th>Office</th>
+                <th>Created At</th>
+                <th>Paid At</th>
+                <th>Office</th>
                 <th>Amount</th>
                 <th>Status</th>
-				<th>Rent Month</th>
+                <th>Rent Month</th>
             </tr>
         </thead>
         <tbody>
             <tr th:each="payment : ${payments}">
-				<td th:text="${payment.createdAt}">2026-04-23T10:00</td>
-				<td th:text="${payment.paidAt != null ? payment.paidAt : 'Not paid yet'}">Not paid yet</td>                <td th:text="${payment.office.officeNumber}">101</td>
+                <td th:text="${payment.createdAt}">2026-04-23T10:00</td>
+                <td th:text="${payment.paidAt != null ? payment.paidAt : 'Not paid yet'}">Not paid yet</td>
+                <td th:text="${payment.office.officeNumber}">101</td>
                 <td th:text="${payment.amount}">$1200.00</td>
                 <td th:text="${payment.status}">PAID</td>
-				<td th:text="${payment.paymentMonth}">2026-04</td>
+                <td th:text="${payment.paymentMonth}">2026-04</td>
             </tr>
         </tbody>
     </table>
-	
-	<p th:if="${#lists.isEmpty(payments)}">
-	    No payment history yet.
-	</p>
 </body>
 </html>

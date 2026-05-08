@@ -13,7 +13,6 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 	List<Payment> findByUserIdOrderByCreatedAtDesc(Long userId);
 
 	List<Payment> findAllByOrderByCreatedAtDesc();
-
     
     Optional<Payment> findByStripeSessionId(String stripeSessionId);
 	boolean existsByOfficeIdAndPaymentMonthAndStatus(Long officeId, String paymentMonth, PaymentStatus paid);
