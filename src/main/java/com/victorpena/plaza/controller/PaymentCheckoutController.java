@@ -64,7 +64,12 @@ public class PaymentCheckoutController {
     }
 
     @GetMapping("/payment/cancel")
-    public String paymentCancel(RedirectAttributes redirectAttributes) {
+    public String paymentCancel(
+            @RequestParam("session_id") String sessionId,
+            RedirectAttributes redirectAttributes) {
+
+        paymentService.markPaymentAsFailed(sessionId);
+
         redirectAttributes.addFlashAttribute("errorMessage", "Stripe checkout was canceled.");
         return "redirect:/tenant/payments/new";
     }

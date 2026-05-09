@@ -81,6 +81,15 @@ public class PaymentService {
         return paymentRepository.save(payment);
     }
     
+    public Payment markPaymentAsFailed(String stripeSessionId) {
+        Payment payment = paymentRepository.findByStripeSessionId(stripeSessionId)
+                .orElseThrow(() -> new IllegalArgumentException("Payment not found for Stripe session"));
+
+        payment.setStatus(PaymentStatus.FAILED);
+
+        return paymentRepository.save(payment);
+    }
+    
     public Payment attachStripeSession(Long paymentId, String stripeSessionId) {
     	Payment payment = paymentRepository.findById(paymentId)
     			.orElseThrow(() -> new IllegalArgumentException("payment not found: " + paymentId));
