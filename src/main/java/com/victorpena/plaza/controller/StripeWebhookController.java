@@ -11,13 +11,20 @@ import org.springframework.web.bind.annotation.RestController;
 import com.stripe.exception.SignatureVerificationException;
 import com.stripe.model.Event;
 import com.stripe.net.Webhook;
-
+import com.victorpena.plaza.service.PaymentService;
+import com.stripe.model.checkout.Session;
 @RestController
 @RequestMapping("/stripe")
 public class StripeWebhookController {
 
     @Value("${stripe.webhook.secret}")
     private String webhookSecret;
+    
+    private final PaymentService paymentService;
+    
+    public StripeWebhookController(PaymentService paymentService) {
+        this.paymentService = paymentService;
+    }
 
     @PostMapping("/webhook")
     public ResponseEntity<String> handleWebhook(
@@ -46,8 +53,12 @@ public class StripeWebhookController {
 
             System.out.println("Checkout completed!");
 
-            // TODO:
-            // Mark payment as PAID here
+            Session session = (Session) event
+                    .getDataObjectDeserializer()
+                    .getObject()
+                    .orElseThrow();
+
+            paymentService.markPaymentAsPaid(session.getId());
         }
 
         return ResponseEntity.ok("Success");

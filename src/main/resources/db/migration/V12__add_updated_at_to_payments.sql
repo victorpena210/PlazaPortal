@@ -1,0 +1,2 @@
+ALTER TABLE payments
+ADD COLUMN updated_at TIMESTAMP NULL;

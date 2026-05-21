@@ -13,6 +13,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 
 @Entity
@@ -37,6 +38,9 @@ public class Payment {
 	@Column(name = "paid_at")
 	private LocalDateTime paidAt;
 	
+	@Column(name = "updated_at")
+	private LocalDateTime updatedAt;
+	
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
 	@JoinColumn(name = "user_id", nullable = false)
 	private User user;
@@ -51,6 +55,9 @@ public class Payment {
 	@Column(name = "stripe_session_id")
 	private String stripeSessionId;
 	
+    private String stripePaymentIntentId;
+
+	
 	public Payment() {
 		
 	}
@@ -60,6 +67,11 @@ public class Payment {
 	    if (createdAt == null) {
 	        createdAt = LocalDateTime.now();
 	    }
+	}
+	
+	@PreUpdate
+	public void preUpdate() {
+	    updatedAt = LocalDateTime.now();
 	}
 
 	public Long getId() {
@@ -132,6 +144,14 @@ public class Payment {
 
 	public void setCreatedAt(LocalDateTime createdAt) {
 		this.createdAt = createdAt;
+	}
+
+	public String getStripePaymentIntentId() {
+		return stripePaymentIntentId;
+	}
+
+	public void setStripePaymentIntentId(String stripePaymentIntentId) {
+		this.stripePaymentIntentId = stripePaymentIntentId;
 	}
 	
 	

@@ -54,11 +54,12 @@ public class PaymentCheckoutController {
 
     @GetMapping("/payment/success")
     public String paymentSuccess(
-            @RequestParam("session_id") String sessionId,
             RedirectAttributes redirectAttributes) {
 
-        paymentService.markPaymentAsPaid(sessionId);
-        redirectAttributes.addFlashAttribute("successMessage", "Rent paid successfully through Stripe.");
+        redirectAttributes.addFlashAttribute(
+                "successMessage",
+                "Stripe payment submitted successfully."
+        );
 
         return "redirect:/tenant/dashboard";
     }
@@ -68,7 +69,6 @@ public class PaymentCheckoutController {
             @RequestParam("session_id") String sessionId,
             RedirectAttributes redirectAttributes) {
 
-        paymentService.markPaymentAsFailed(sessionId);
 
         redirectAttributes.addFlashAttribute("errorMessage", "Stripe checkout was canceled.");
         return "redirect:/tenant/payments/new";

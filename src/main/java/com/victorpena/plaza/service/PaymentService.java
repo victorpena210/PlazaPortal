@@ -58,7 +58,7 @@ public class PaymentService {
         payment.setOffice(office);
         payment.setAmount(office.getMonthlyRent());
         payment.setPaymentMonth(paymentMonth);
-        payment.setStatus(PaymentStatus.DUE);
+        payment.setStatus(PaymentStatus.PENDING);
 
         return paymentRepository.save(payment);
     }
@@ -74,6 +74,11 @@ public class PaymentService {
     public Payment markPaymentAsPaid(String stripeSessionId) {
         Payment payment = paymentRepository.findByStripeSessionId(stripeSessionId)
                 .orElseThrow(() -> new IllegalArgumentException("Payment not found for Stripe session"));
+        
+     // Prevent duplicate webhook processing
+        if (payment.getStatus() == PaymentStatus.PAID) {
+            return payment;
+        }
 
         payment.setStatus(PaymentStatus.PAID);
         payment.setPaidAt(LocalDateTime.now());
