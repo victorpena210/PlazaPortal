@@ -1,41 +1,84 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+
 <body>
 
-    <nav th:fragment="navbar" style="
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 16px 24px;
-        background-color: #222;
-        color: white;
-        margin-bottom: 30px;
-        border-radius: 8px;
-    ">
-        <div>
-            <a th:href="@{/}" style="color: white; text-decoration: none; font-weight: bold; font-size: 20px;">
-                Pena Plaza
-            </a>
+<nav th:fragment="navbar"
+     class="bg-white shadow-md border-b">
+
+    <div class="max-w-7xl mx-auto px-6">
+
+        <div class="flex justify-between items-center h-16">
+
+			<!-- Logo -->
+			<div>
+			    <a th:href="@{/}"
+			       class="flex items-center gap-3">
+
+			        <img th:src="@{/images/penaPlazaLogo.png}"
+			             alt="Pena Plaza Logo"
+			             class="h-10 w-auto object-contain" />
+
+			        <span class="text-2xl font-bold text-blue-700 hover:text-blue-800 transition">
+			            Pena Plaza
+			        </span>
+
+			    </a>
+			</div>
+
+            <!-- Navigation Links -->
+            <div class="flex items-center space-x-6">
+
+                <a th:href="@{/}"
+                   class="text-gray-700 hover:text-blue-600 font-medium transition">
+
+                    Home
+
+                </a>
+
+                <a th:href="@{/register}"
+                   class="text-gray-700 hover:text-blue-600 font-medium transition">
+
+                    Register
+
+                </a>
+
+                <a th:href="@{/login}"
+                   class="text-gray-700 hover:text-blue-600 font-medium transition">
+
+                    Login
+
+                </a>
+
+                <a th:href="@{/admin/payments}"
+                   class="text-gray-700 hover:text-blue-600 font-medium transition">
+
+                    Payments
+
+                </a>
+
+                <!-- Logout Button -->
+                <form th:action="@{/logout}" method="post">
+
+                    <button type="submit"
+                            class="bg-red-500 hover:bg-red-600
+                                   text-white px-4 py-2 rounded-lg
+                                   font-medium transition">
+
+                        Logout
+
+                    </button>
+
+                </form>
+
+            </div>
+
         </div>
 
-        <div style="display: flex; gap: 16px; align-items: center;">
-            <a th:href="@{/}" style="color: white; text-decoration: none;">Home</a>
-            <a th:href="@{/register}" style="color: white; text-decoration: none;">Register</a>
-            <a th:href="@{/login}" style="color: white; text-decoration: none;">Login</a>
-			<a th:href="@{/admin/payments}">Payments</a>
-        
-			<form th:action="@{/logout}" method="post" style="margin: 0;">
-			    <button type="submit" style="
-			        background: none;
-			        border: none;
-			        color: white;
-			        cursor: pointer;
-			        font-size: 16px;
-			        padding: 0;
-			    ">Logout</button>
-			</form>	
-		</div>
-    </nav>
+    </div>
+
+</nav>
 
 </body>
+
 </html>

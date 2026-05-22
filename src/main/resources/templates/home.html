@@ -1,45 +1,294 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
-    <title>Pena Plaza</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 40px;
-        }
-        h1 {
-            margin-bottom: 10px;
-        }
-        .office-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 16px;
-            margin-top: 24px;
-        }
-        .office-card {
-            border: 1px solid #ddd;
-            padding: 16px;
-            border-radius: 8px;
-        }
-        .status {
-            font-weight: bold;
-        }
-    </style>
-</head>
-<body>
-	<div th:replace="~{fragments/navbar :: navbar}"></div>
-    <h1>Welcome to Pena Plaza</h1>
-    <p>Browse our available office spaces.</p>
 
-    <div class="office-grid">
-        <div class="office-card" th:each="office : ${offices}">
-            <h3 th:text="'Office ' + ${office.officeNumber}">Office 1</h3>
-            <p th:text="'Square Feet: ' + ${office.squareFeet}">Square Feet</p>
-            <p th:text="'Monthly Rent: $' + ${office.monthlyRent}">Monthly Rent</p>
-            <p class="status" th:text="'Status: ' + ${office.status}">Status</p>
-            <p th:text="${office.description}">Description</p>
+    <title>Pena Plaza</title>
+	
+	<link rel="icon"
+	      type="image/png"
+	      th:href="@{/images/penaPlazaLogo.png}">
+
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Icons -->
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+
+    <link rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+          rel="stylesheet">
+
+		  
+</head>
+
+<body class="bg-slate-50 min-h-screen"
+      style="font-family: 'Inter', sans-serif;">
+
+    <!-- Navbar -->
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <!-- HERO SECTION -->
+    <section class="relative h-[650px] overflow-hidden">
+
+        <!-- Background Image -->
+		<img th:src="@{/images/plaza-portal-hero.png}"
+		     alt="Pena Plaza"
+		     class="absolute inset-0 w-full h-full object-cover">
+
+        <!-- Dark Overlay -->
+        <div class="absolute inset-0 bg-black/50"></div>
+
+        <!-- Hero Content -->
+        <div class="relative z-10 max-w-7xl mx-auto px-6 h-full flex items-center">
+
+            <div class="max-w-3xl text-white">
+
+                <h1 class="text-6xl md:text-7xl font-extrabold leading-tight">
+
+                    Premium Office Space
+                    <span class="text-yellow-300">
+                        at Pena Plaza
+                    </span>
+
+                </h1>
+
+                <p class="mt-6 text-xl text-gray-200 leading-relaxed">
+
+                    Modern commercial office spaces designed for businesses,
+                    entrepreneurs, and growing companies.
+
+                </p>
+
+                <!-- Hero Buttons -->
+                <div class="flex flex-wrap gap-4 mt-10">
+
+                    <a href="#offices"
+
+                       class="bg-blue-600 hover:bg-blue-700
+                              text-white px-8 py-4 rounded-xl
+                              text-lg font-semibold
+                              shadow-xl transition
+                              hover:scale-[1.02]">
+
+                        View Offices
+
+                    </a>
+
+                    <a th:href="@{/register}"
+
+                       class="bg-white/20 backdrop-blur-md
+                              border border-white/30
+                              hover:bg-white/30
+
+                              text-white px-8 py-4
+                              rounded-xl text-lg
+                              font-semibold transition">
+
+                        Register
+
+                    </a>
+
+                </div>
+
+            </div>
+
         </div>
+
+    </section>
+
+    <!-- MAIN CONTENT -->
+    <div class="max-w-7xl mx-auto px-6 py-16">
+
+        <!-- Dashboard Summary -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
+
+            <!-- Available Offices -->
+            <div class="bg-white rounded-2xl shadow-lg p-8">
+
+                <div class="flex items-center justify-between">
+
+                    <div>
+
+                        <h2 class="text-gray-500 text-lg">
+                            Available Offices
+                        </h2>
+
+                        <p class="text-5xl font-bold text-green-600 mt-3"
+                           th:text="${offices.size()}">
+
+                            12
+
+                        </p>
+
+                    </div>
+
+                    <i class="fa-solid fa-building
+                              text-5xl text-green-200"></i>
+
+                </div>
+
+            </div>
+
+            <!-- Average Rent -->
+            <div class="bg-white rounded-2xl shadow-lg p-8">
+
+                <div class="flex items-center justify-between">
+
+                    <div>
+
+                        <h2 class="text-gray-500 text-lg">
+                            Average Rent
+                        </h2>
+
+                        <p class="text-5xl font-bold text-blue-600 mt-3">
+                            $850
+                        </p>
+
+                    </div>
+
+                    <i class="fa-solid fa-dollar-sign
+                              text-5xl text-blue-200"></i>
+
+                </div>
+
+            </div>
+
+            <!-- Occupancy -->
+            <div class="bg-white rounded-2xl shadow-lg p-8">
+
+                <div class="flex items-center justify-between">
+
+                    <div>
+
+                        <h2 class="text-gray-500 text-lg">
+                            Occupancy Rate
+                        </h2>
+
+                        <p class="text-5xl font-bold text-purple-600 mt-3">
+                            82%
+                        </p>
+
+                    </div>
+
+                    <i class="fa-solid fa-chart-line
+                              text-5xl text-purple-200"></i>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Offices Header -->
+        <div id="offices" class="mb-10">
+
+            <h2 class="text-5xl font-bold text-gray-800">
+
+                Available Offices
+
+            </h2>
+
+            <p class="text-gray-600 mt-4 text-xl">
+
+                Browse premium commercial office spaces available now.
+
+            </p>
+
+        </div>
+
+        <!-- Office Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+
+            <!-- Office Card -->
+            <div class="bg-white rounded-2xl shadow-lg p-6
+                        hover:shadow-2xl transition duration-300"
+
+                 th:each="office : ${offices}">
+
+                <!-- Card Header -->
+                <div class="flex justify-between items-center mb-5">
+
+                    <h3 class="text-3xl font-bold text-blue-700"
+                        th:text="'Office ' + ${office.officeNumber}">
+
+                        Office 1
+
+                    </h3>
+
+                    <!-- Status Badge -->
+                    <span class="px-3 py-1 rounded-full
+                                 text-sm font-semibold"
+
+                          th:classappend="${office.status.name() == 'AVAILABLE'}
+                          ? ' bg-green-100 text-green-700'
+                          : ' bg-red-100 text-red-700'"
+
+                          th:text="${office.status}">
+
+                        AVAILABLE
+
+                    </span>
+
+                </div>
+
+                <!-- Office Info -->
+                <div class="space-y-4 text-gray-700">
+
+                    <p>
+                        <i class="fa-solid fa-ruler-combined
+                                  text-gray-500 mr-2"></i>
+
+                        <span th:text="${office.squareFeet}"></span>
+                        sq ft
+                    </p>
+
+                    <p>
+                        <i class="fa-solid fa-dollar-sign
+                                  text-gray-500 mr-2"></i>
+
+                        $<span th:text="${office.monthlyRent}"></span>/month
+                    </p>
+
+                    <p class="text-gray-600 leading-relaxed"
+                       th:text="${office.description}">
+
+                        Description
+
+                    </p>
+
+                </div>
+
+                <!-- Button -->
+                <div class="mt-6">
+
+                    <button class="w-full bg-blue-600 hover:bg-blue-700
+                                   hover:scale-[1.02]
+                                   active:scale-[0.98]
+
+                                   text-white py-3 rounded-xl
+                                   font-semibold transition">
+
+                        View Details
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
     </div>
+
 </body>
+
 </html>

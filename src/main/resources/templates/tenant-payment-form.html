@@ -1,71 +1,341 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+
 <head>
+
     <meta charset="UTF-8">
+
     <title>Pay Rent - Pena Plaza</title>
+
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Google Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+
+    <link rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+          rel="stylesheet">
+
 </head>
-<body>
+
+<body class="bg-slate-50 min-h-screen"
+      style="font-family: 'Inter', sans-serif;">
+
+    <!-- Navbar -->
     <div th:replace="~{fragments/navbar :: navbar}"></div>
 
-    <h1>Pay Rent</h1>
+    <!-- Main Container -->
+    <div class="max-w-7xl mx-auto px-6 py-10">
 
-    <p>
-        Tenant:
-        <strong th:text="${user.firstName + ' ' + user.lastName}">Tenant Name</strong>
-    </p>
+        <!-- Header -->
+        <div class="mb-10">
 
-    <div th:if="${#lists.isEmpty(offices)}">
-        <p>You do not have any assigned offices to pay for.</p>
+            <h1 class="text-5xl font-bold text-gray-800">
+                Pay Rent
+            </h1>
+
+            <p class="text-gray-600 mt-3 text-lg">
+
+                Securely pay your monthly rent online using Stripe.
+
+            </p>
+
+        </div>
+
+        <!-- Tenant Card -->
+        <div class="bg-white rounded-2xl shadow-lg
+                    p-8 mb-10">
+
+            <div class="flex items-center justify-between">
+
+                <div>
+
+                    <p class="text-gray-500 text-lg">
+                        Tenant
+                    </p>
+
+                    <h2 class="text-3xl font-bold text-blue-700 mt-2"
+                        th:text="${user.firstName + ' ' + user.lastName}">
+
+                        Tenant Name
+
+                    </h2>
+
+                </div>
+
+                <i class="fa-solid fa-user
+                          text-6xl text-blue-200"></i>
+
+            </div>
+
+        </div>
+
+        <!-- Empty State -->
+        <div th:if="${#lists.isEmpty(offices)}"
+             class="bg-white rounded-2xl shadow-lg
+                    p-12 text-center">
+
+            <i class="fa-solid fa-building-circle-xmark
+                      text-6xl text-gray-300 mb-5"></i>
+
+            <p class="text-2xl text-gray-600">
+                You do not have any assigned offices to pay for.
+            </p>
+
+        </div>
+
+        <!-- Payment Form -->
+        <div th:if="${!#lists.isEmpty(offices)}"
+             class="bg-white rounded-2xl shadow-xl
+                    p-10 mb-12">
+
+            <h2 class="text-3xl font-bold text-gray-800 mb-8">
+
+                Payment Details
+
+            </h2>
+
+            <form th:action="@{/tenant/payments/checkout}"
+                  method="post"
+                  class="space-y-8">
+
+                <!-- Office -->
+                <div>
+
+                    <label for="officeId"
+                           class="block text-gray-700
+                                  font-semibold mb-3">
+
+                        Select Office
+
+                    </label>
+
+                    <select name="officeId"
+                            id="officeId"
+                            required
+
+                            class="w-full border border-gray-300
+                                   rounded-xl px-5 py-4
+                                   text-lg
+
+                                   focus:ring-2
+                                   focus:ring-blue-500
+                                   focus:outline-none">
+
+                        <option value="" disabled selected>
+                            Select an office
+                        </option>
+
+                        <option th:each="office : ${offices}"
+                                th:value="${office.id}"
+
+                                th:text="${office.officeNumber + ' - $' + office.monthlyRent}">
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <!-- Month -->
+                <div>
+
+                    <label for="paymentMonth"
+                           class="block text-gray-700
+                                  font-semibold mb-3">
+
+                        Payment Month
+
+                    </label>
+
+                    <input type="month"
+                           id="paymentMonth"
+                           name="paymentMonth"
+                           required
+
+                           class="w-full border border-gray-300
+                                  rounded-xl px-5 py-4
+                                  text-lg
+
+                                  focus:ring-2
+                                  focus:ring-blue-500
+                                  focus:outline-none">
+
+                </div>
+
+                <!-- Stripe Button -->
+                <div>
+
+                    <button type="submit"
+
+                            class="w-full bg-indigo-600
+                                   hover:bg-indigo-700
+
+                                   text-white text-lg
+                                   font-semibold
+
+                                   py-4 rounded-xl
+
+                                   shadow-lg
+                                   transition
+
+                                   hover:scale-[1.01]
+                                   active:scale-[0.99]">
+
+                        Continue to Stripe
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+        <!-- Payment History -->
+        <div class="bg-white rounded-2xl shadow-lg p-8">
+
+            <div class="flex items-center justify-between mb-8">
+
+                <h2 class="text-3xl font-bold text-gray-800">
+                    Payment History
+                </h2>
+
+                <i class="fa-solid fa-clock-rotate-left
+                          text-4xl text-gray-300"></i>
+
+            </div>
+
+            <!-- Empty -->
+            <div th:if="${#lists.isEmpty(payments)}"
+                 class="text-center py-10">
+
+                <p class="text-xl text-gray-600">
+                    You have not made any payments yet.
+                </p>
+
+            </div>
+
+            <!-- Payments Table -->
+            <div th:if="${!#lists.isEmpty(payments)}"
+                 class="overflow-x-auto">
+
+                <table class="min-w-full">
+
+                    <!-- Header -->
+                    <thead class="bg-slate-100">
+
+                        <tr>
+
+                            <th class="p-5 text-left">
+                                Created At
+                            </th>
+
+                            <th class="p-5 text-left">
+                                Paid At
+                            </th>
+
+                            <th class="p-5 text-left">
+                                Office
+                            </th>
+
+                            <th class="p-5 text-left">
+                                Amount
+                            </th>
+
+                            <th class="p-5 text-left">
+                                Status
+                            </th>
+
+                            <th class="p-5 text-left">
+                                Rent Month
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+                    <!-- Body -->
+                    <tbody>
+
+                        <tr th:each="payment : ${payments}"
+                            class="border-b hover:bg-slate-50 transition">
+
+                            <!-- Created -->
+                            <td class="p-5 text-gray-700"
+                                th:text="${payment.createdAt}">
+                            </td>
+
+                            <!-- Paid -->
+                            <td class="p-5 text-gray-700"
+
+                                th:text="${payment.paidAt != null ? payment.paidAt : 'Not paid yet'}">
+
+                                Not paid yet
+
+                            </td>
+
+                            <!-- Office -->
+                            <td class="p-5 font-semibold text-blue-700"
+                                th:text="${payment.office.officeNumber}">
+                            </td>
+
+                            <!-- Amount -->
+                            <td class="p-5 font-bold text-emerald-600"
+
+                                th:text="'$' + ${payment.amount}">
+
+                                $1200.00
+
+                            </td>
+
+                            <!-- Status -->
+                            <td class="p-5">
+
+                                <span class="px-3 py-1 rounded-full
+                                             text-sm font-semibold"
+
+                                      th:classappend="
+                                      ${payment.status.name() == 'PAID'} ?
+                                      ' bg-green-100 text-green-700' :
+
+                                      (${payment.status.name() == 'PENDING'} ?
+                                      ' bg-yellow-100 text-yellow-700' :
+
+                                      ' bg-red-100 text-red-700')"
+
+                                      th:text="${payment.status}">
+
+                                    PAID
+
+                                </span>
+
+                            </td>
+
+                            <!-- Month -->
+                            <td class="p-5 text-gray-700"
+                                th:text="${payment.paymentMonth}">
+                            </td>
+
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
     </div>
 
-    <form th:if="${!#lists.isEmpty(offices)}"
-          th:action="@{/tenant/payments/checkout}"
-          method="post">
-
-        <label for="officeId">Select Office:</label>
-        <select name="officeId" id="officeId" required>
-            <option value="" disabled selected>Select an office</option>
-            <option th:each="office : ${offices}"
-                    th:value="${office.id}"
-                    th:text="${office.officeNumber + ' - $' + office.monthlyRent}">
-            </option>
-        </select>
-
-        <label for="paymentMonth">Payment Month:</label>
-        <input type="month" id="paymentMonth" name="paymentMonth" required>
-
-        <button type="submit">Continue to Stripe</button>
-    </form>
-
-    <hr>
-
-    <h2>Your Payment History</h2>
-
-    <div th:if="${#lists.isEmpty(payments)}">
-        <p>You have not made any payments yet.</p>
-    </div>
-
-    <table th:if="${!#lists.isEmpty(payments)}" border="1" cellpadding="8" cellspacing="0">
-        <thead>
-            <tr>
-                <th>Created At</th>
-                <th>Paid At</th>
-                <th>Office</th>
-                <th>Amount</th>
-                <th>Status</th>
-                <th>Rent Month</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr th:each="payment : ${payments}">
-                <td th:text="${payment.createdAt}">2026-04-23T10:00</td>
-                <td th:text="${payment.paidAt != null ? payment.paidAt : 'Not paid yet'}">Not paid yet</td>
-                <td th:text="${payment.office.officeNumber}">101</td>
-                <td th:text="${payment.amount}">$1200.00</td>
-                <td th:text="${payment.status}">PAID</td>
-                <td th:text="${payment.paymentMonth}">2026-04</td>
-            </tr>
-        </tbody>
-    </table>
 </body>
+
 </html>

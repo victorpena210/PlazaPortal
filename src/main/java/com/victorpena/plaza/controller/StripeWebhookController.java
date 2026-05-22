@@ -13,6 +13,9 @@ import com.stripe.model.Event;
 import com.stripe.net.Webhook;
 import com.victorpena.plaza.service.PaymentService;
 import com.stripe.model.checkout.Session;
+import com.stripe.model.PaymentIntent;
+
+
 @RestController
 @RequestMapping("/stripe")
 public class StripeWebhookController {
@@ -60,6 +63,37 @@ public class StripeWebhookController {
 
             paymentService.markPaymentAsPaid(session.getId());
         }
+        
+        if ("payment_intent.payment_failed".equals(event.getType())) {
+
+            System.out.println("Payment failed!");
+
+            PaymentIntent paymentIntent = (PaymentIntent) event
+                    .getDataObjectDeserializer()
+                    .getObject()
+                    .orElseThrow();
+
+            paymentService.markPaymentAsFailed(
+                    paymentIntent.getId()
+            );
+        }
+        
+        if ("checkout.session.expired".equals(event.getType())) {
+
+            System.out.println("Checkout expired!");
+
+            Session session = (Session) event
+                    .getDataObjectDeserializer()
+                    .getObject()
+                    .orElse(null);
+
+            if (session != null) {
+                paymentService.markPaymentAsCanceled(session.getId());
+            }
+        }
+        
+        System.out.println("Webhook verified!");
+        System.out.println("Event Type: " + event.getType());
 
         return ResponseEntity.ok("Success");
     }

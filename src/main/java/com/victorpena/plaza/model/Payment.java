@@ -56,6 +56,8 @@ public class Payment {
 	private String stripeSessionId;
 	
     private String stripePaymentIntentId;
+    
+    private String receiptUrl;
 
 	
 	public Payment() {
@@ -152,6 +154,22 @@ public class Payment {
 
 	public void setStripePaymentIntentId(String stripePaymentIntentId) {
 		this.stripePaymentIntentId = stripePaymentIntentId;
+	}
+
+	public LocalDateTime getUpdatedAt() {
+		return updatedAt;
+	}
+
+	public void setUpdatedAt(LocalDateTime updatedAt) {
+		this.updatedAt = updatedAt;
+	}
+
+	public String getReceiptUrl() {
+		return receiptUrl;
+	}
+
+	public void setReceiptUrl(String receiptUrl) {
+		this.receiptUrl = receiptUrl;
 	}
 	
 	

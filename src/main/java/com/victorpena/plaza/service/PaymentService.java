@@ -1,6 +1,7 @@
 package com.victorpena.plaza.service;
 
 import com.victorpena.plaza.model.PaymentStatus;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -12,7 +13,7 @@ import com.victorpena.plaza.model.User;
 import com.victorpena.plaza.repository.OfficeRepository;
 import com.victorpena.plaza.repository.PaymentRepository;
 import com.victorpena.plaza.repository.UserRepository;
-
+import org.springframework.transaction.annotation.Transactional;
 @Service
 public class PaymentService {
 
@@ -29,6 +30,7 @@ public class PaymentService {
         this.officeRepository = officeRepository;
     }
 
+    @Transactional
     public Payment createPayment(Long userId, Long officeId, String paymentMonth) {
         if (paymentMonth == null || paymentMonth.isBlank()) {
             throw new IllegalArgumentException("Payment month is required.");
@@ -44,14 +46,21 @@ public class PaymentService {
             throw new IllegalArgumentException("You can only pay for your assigned office.");
         }
 
-        if (paymentRepository.existsByOfficeIdAndPaymentMonthAndStatus(
-                officeId,
-                paymentMonth,
-                PaymentStatus.PAID
-        )) {
-            throw new IllegalArgumentException("Rent has already been paid for this office for " + paymentMonth + "."
-);
-        }
+        boolean existingPayment =
+        	    paymentRepository.existsByOfficeIdAndPaymentMonthAndStatusIn(
+        	        officeId,
+        	        paymentMonth,
+        	        List.of(
+        	            PaymentStatus.PENDING,
+        	            PaymentStatus.PAID
+        	        )
+        	    );
+
+        	if(existingPayment) {
+        	    throw new IllegalArgumentException(
+        	        "A payment already exists for this month."
+        	    );
+        	}
 
         Payment payment = new Payment();
         payment.setUser(user);
@@ -59,6 +68,7 @@ public class PaymentService {
         payment.setAmount(office.getMonthlyRent());
         payment.setPaymentMonth(paymentMonth);
         payment.setStatus(PaymentStatus.PENDING);
+        payment.setCreatedAt(LocalDateTime.now());
 
         return paymentRepository.save(payment);
     }
@@ -71,6 +81,7 @@ public class PaymentService {
         return paymentRepository.findAllByOrderByCreatedAtDesc();
     }
     
+    @Transactional
     public Payment markPaymentAsPaid(String stripeSessionId) {
         Payment payment = paymentRepository.findByStripeSessionId(stripeSessionId)
                 .orElseThrow(() -> new IllegalArgumentException("Payment not found for Stripe session"));
@@ -86,6 +97,7 @@ public class PaymentService {
         return paymentRepository.save(payment);
     }
     
+    @Transactional
     public Payment markPaymentAsFailed(String stripeSessionId) {
         Payment payment = paymentRepository.findByStripeSessionId(stripeSessionId)
                 .orElseThrow(() -> new IllegalArgumentException("Payment not found for Stripe session"));
@@ -95,10 +107,27 @@ public class PaymentService {
         return paymentRepository.save(payment);
     }
     
+    @Transactional
     public Payment attachStripeSession(Long paymentId, String stripeSessionId) {
     	Payment payment = paymentRepository.findById(paymentId)
     			.orElseThrow(() -> new IllegalArgumentException("payment not found: " + paymentId));
     	payment.setStripeSessionId(stripeSessionId);
     	return paymentRepository.save(payment);
+    }
+
+    
+    @Transactional
+    public Payment markPaymentAsCanceled(String stripeSessionId) {
+
+        Payment payment = paymentRepository
+                .findByStripeSessionId(stripeSessionId)
+                .orElseThrow(() ->
+                        new IllegalArgumentException(
+                                "Payment not found for Stripe session"
+                        ));
+
+        payment.setStatus(PaymentStatus.CANCELLED);
+
+        return paymentRepository.save(payment);
     }
 }
