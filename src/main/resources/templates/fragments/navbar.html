@@ -1,69 +1,125 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
 <body>
 
 <nav th:fragment="navbar"
-     class="bg-white shadow-md border-b">
+     x-data="{ open: false }"
+     class="bg-white shadow-md border-b sticky top-0 z-50">
+
+    <!-- AlpineJS -->
+    <script defer
+            src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js">
+    </script>
 
     <div class="max-w-7xl mx-auto px-6">
 
+        <!-- Main Navbar -->
         <div class="flex justify-between items-center h-16">
 
-			<!-- Logo -->
-			<div>
-			    <a th:href="@{/}"
-			       class="flex items-center gap-3">
+            <!-- Logo -->
+            <a th:href="@{/}"
+               class="flex items-center gap-3 group">
 
-			        <img th:src="@{/images/penaPlazaLogo.png}"
-			             alt="Pena Plaza Logo"
-			             class="h-10 w-auto object-contain" />
+                <img th:src="@{/images/penaPlazaLogo.png}"
+                     alt="Pena Plaza Logo"
+                     class="h-10 w-auto object-contain" />
 
-			        <span class="text-2xl font-bold text-blue-700 hover:text-blue-800 transition">
-			            Pena Plaza
-			        </span>
+                <span class="text-2xl font-bold
+                             text-blue-700
+                             group-hover:text-blue-800
+                             transition">
 
-			    </a>
-			</div>
+                    Pena Plaza
 
-            <!-- Navigation Links -->
-            <div class="flex items-center space-x-6">
+                </span>
 
+            </a>
+
+            <!-- Desktop Navigation -->
+            <div class="hidden md:flex items-center gap-6">
+
+                <!-- Home -->
                 <a th:href="@{/}"
-                   class="text-gray-700 hover:text-blue-600 font-medium transition">
+                   th:classappend="${activePage == 'home'}
+                   ? 'text-blue-600 border-b-2 border-blue-600 pb-1'
+                   : 'text-gray-700'"
+                   class="hover:text-blue-600 font-medium transition">
 
                     Home
 
                 </a>
 
+                <!-- Register -->
                 <a th:href="@{/register}"
-                   class="text-gray-700 hover:text-blue-600 font-medium transition">
+                   th:classappend="${activePage == 'register'}
+                   ? 'text-blue-600 border-b-2 border-blue-600 pb-1'
+                   : 'text-gray-700'"
+                   class="hover:text-blue-600 font-medium transition">
 
                     Register
 
                 </a>
 
+                <!-- Login -->
                 <a th:href="@{/login}"
-                   class="text-gray-700 hover:text-blue-600 font-medium transition">
+                   sec:authorize="!isAuthenticated()"
+                   th:classappend="${activePage == 'login'}
+                   ? 'text-blue-600 border-b-2 border-blue-600 pb-1'
+                   : 'text-gray-700'"
+                   class="hover:text-blue-600 font-medium transition">
 
                     Login
 
                 </a>
 
+                <!-- Tenant Dashboard -->
+                <a th:href="@{/tenant/dashboard}"
+                   sec:authorize="hasRole('TENANT')"
+                   th:classappend="${activePage == 'tenant-dashboard'}
+                   ? 'text-blue-600 border-b-2 border-blue-600 pb-1'
+                   : 'text-gray-700'"
+                   class="hover:text-blue-600 font-medium transition">
+
+                    Dashboard
+
+                </a>
+
+                <!-- Payments -->
                 <a th:href="@{/admin/payments}"
-                   class="text-gray-700 hover:text-blue-600 font-medium transition">
+                   sec:authorize="hasAnyRole('ADMIN','TENANT')"
+                   th:classappend="${activePage == 'payments'}
+                   ? 'text-blue-600 border-b-2 border-blue-600 pb-1'
+                   : 'text-gray-700'"
+                   class="hover:text-blue-600 font-medium transition">
 
                     Payments
 
                 </a>
 
-                <!-- Logout Button -->
-                <form th:action="@{/logout}" method="post">
+                <!-- Admin Panel -->
+                <a th:href="@{/admin/dashboard}"
+                   sec:authorize="hasRole('ADMIN')"
+                   th:classappend="${activePage == 'admin-dashboard'}
+                   ? 'text-blue-600 border-b-2 border-blue-600 pb-1'
+                   : 'text-gray-700'"
+                   class="hover:text-blue-600 font-medium transition">
+
+                    Admin
+
+                </a>
+
+                <!-- Logout -->
+                <form th:action="@{/logout}"
+                      method="post"
+                      sec:authorize="isAuthenticated()">
 
                     <button type="submit"
                             class="bg-red-500 hover:bg-red-600
-                                   text-white px-4 py-2 rounded-lg
-                                   font-medium transition">
+                                   text-white px-4 py-2 rounded-xl
+                                   font-medium shadow-sm
+                                   transition duration-200">
 
                         Logout
 
@@ -72,6 +128,101 @@
                 </form>
 
             </div>
+
+            <!-- Mobile Hamburger -->
+            <button @click="open = !open"
+                    class="md:hidden text-gray-700">
+
+                <!-- Hamburger Icon -->
+                <svg xmlns="http://www.w3.org/2000/svg"
+                     class="h-8 w-8"
+                     fill="none"
+                     viewBox="0 0 24 24"
+                     stroke="currentColor">
+
+                    <path stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M4 6h16M4 12h16M4 18h16" />
+
+                </svg>
+
+            </button>
+
+        </div>
+
+        <!-- Mobile Menu -->
+        <div x-show="open"
+             x-transition
+             class="md:hidden py-4 space-y-4 border-t">
+
+            <!-- Home -->
+            <a th:href="@{/}"
+               class="block text-gray-700 hover:text-blue-600 font-medium">
+
+                Home
+
+            </a>
+
+            <!-- Register -->
+            <a th:href="@{/register}"
+               class="block text-gray-700 hover:text-blue-600 font-medium">
+
+                Register
+
+            </a>
+
+            <!-- Login -->
+            <a th:href="@{/login}"
+               sec:authorize="!isAuthenticated()"
+               class="block text-gray-700 hover:text-blue-600 font-medium">
+
+                Login
+
+            </a>
+
+            <!-- Tenant Dashboard -->
+            <a th:href="@{/tenant/dashboard}"
+               sec:authorize="hasRole('TENANT')"
+               class="block text-gray-700 hover:text-blue-600 font-medium">
+
+                Dashboard
+
+            </a>
+
+            <!-- Payments -->
+            <a th:href="@{/admin/payments}"
+               sec:authorize="hasAnyRole('ADMIN','TENANT')"
+               class="block text-gray-700 hover:text-blue-600 font-medium">
+
+                Payments
+
+            </a>
+
+            <!-- Admin -->
+            <a th:href="@{/admin/dashboard}"
+               sec:authorize="hasRole('ADMIN')"
+               class="block text-gray-700 hover:text-blue-600 font-medium">
+
+                Admin
+
+            </a>
+
+            <!-- Logout -->
+            <form th:action="@{/logout}"
+                  method="post"
+                  sec:authorize="isAuthenticated()">
+
+                <button type="submit"
+                        class="w-full bg-red-500 hover:bg-red-600
+                               text-white px-4 py-2 rounded-xl
+                               font-medium transition">
+
+                    Logout
+
+                </button>
+
+            </form>
 
         </div>
 
