@@ -2,6 +2,8 @@ package com.victorpena.plaza.service;
 
 import com.victorpena.plaza.model.PaymentStatus;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -63,9 +65,19 @@ public class PaymentService {
         	}
 
         Payment payment = new Payment();
+        
+        BigDecimal rent = office.getMonthlyRent();
+        BigDecimal lateFee = BigDecimal.ZERO;
+
+        if (LocalDate.now().getDayOfMonth() > 5) {
+            lateFee = new BigDecimal("75.00");
+        }
+
         payment.setUser(user);
         payment.setOffice(office);
-        payment.setAmount(office.getMonthlyRent());
+        payment.setAmount(rent);
+        payment.setLateFee(lateFee);
+        payment.setTotalAmount(rent.add(lateFee));       
         payment.setPaymentMonth(paymentMonth);
         payment.setStatus(PaymentStatus.PENDING);
         payment.setCreatedAt(LocalDateTime.now());

@@ -4,6 +4,7 @@ import com.victorpena.plaza.service.PaymentService;
 import com.victorpena.plaza.service.UserService;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -42,6 +43,22 @@ public class PaymentController {
 				);
 		
 		return "redirect:/tenant/payments";
+	}
+	
+	@PostMapping("/admin/payments/{id}/approve")
+	public String approvePayment(
+	        @PathVariable Long id,
+	        RedirectAttributes redirectAttributes
+	) {
+
+	    paymentService.markAsPaid(id);
+
+	    redirectAttributes.addFlashAttribute(
+	            "success",
+	            "Payment approved successfully."
+	    );
+
+	    return "redirect:/admin/payments";
 	}
 
 }

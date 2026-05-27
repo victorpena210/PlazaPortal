@@ -101,4 +101,29 @@ public class TenantController {
     	
     }
     
+    @GetMapping("/payments")
+    public String tenantPayments(
+            Authentication authentication,
+            Model model
+    ) {
+
+        User user = userService.findByEmail(authentication.getName())
+                .orElseThrow(() ->
+                        new IllegalArgumentException("User not found"));
+
+        List<Office> offices = officeService.findByUserId(user.getId());
+
+        model.addAttribute(
+                "payments",
+                paymentService.findByUserId(user.getId())
+        );
+
+        model.addAttribute(
+                "offices",
+                offices
+        );
+
+        return "tenant-payments";
+    }
+    
 }
