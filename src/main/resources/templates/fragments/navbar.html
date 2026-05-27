@@ -15,16 +15,17 @@
 
     <div class="max-w-7xl mx-auto px-6">
 
-        <!-- Main Navbar -->
+        <!-- NAVBAR -->
         <div class="flex justify-between items-center h-16">
 
-            <!-- Logo -->
+            <!-- LOGO -->
             <a th:href="@{/}"
                class="flex items-center gap-3 group">
 
-                <img th:src="@{/images/penaPlazaLogo.png}"
-                     alt="Pena Plaza Logo"
-                     class="h-10 w-auto object-contain" />
+			   <img src="/images/penaPlazaLogo.png"
+			        alt="Pena Plaza Logo"
+			        class="h-10 w-auto object-contain">
+
 
                 <span class="text-2xl font-bold
                              text-blue-700
@@ -37,10 +38,10 @@
 
             </a>
 
-            <!-- Desktop Navigation -->
+            <!-- DESKTOP NAVIGATION -->
             <div class="hidden md:flex items-center gap-6">
 
-                <!-- Home -->
+                <!-- HOME -->
                 <a th:href="@{/}"
                    th:classappend="${activePage == 'home'}
                    ? 'text-blue-600 border-b-2 border-blue-600 pb-1'
@@ -51,8 +52,9 @@
 
                 </a>
 
-                <!-- Register -->
+                <!-- REGISTER -->
                 <a th:href="@{/register}"
+                   sec:authorize="!isAuthenticated()"
                    th:classappend="${activePage == 'register'}
                    ? 'text-blue-600 border-b-2 border-blue-600 pb-1'
                    : 'text-gray-700'"
@@ -62,7 +64,7 @@
 
                 </a>
 
-                <!-- Login -->
+                <!-- LOGIN -->
                 <a th:href="@{/login}"
                    sec:authorize="!isAuthenticated()"
                    th:classappend="${activePage == 'login'}
@@ -74,7 +76,7 @@
 
                 </a>
 
-                <!-- Tenant Dashboard -->
+                <!-- TENANT DASHBOARD -->
                 <a th:href="@{/tenant/dashboard}"
                    sec:authorize="hasRole('TENANT')"
                    th:classappend="${activePage == 'tenant-dashboard'}
@@ -86,7 +88,7 @@
 
                 </a>
 
-                <!-- Payments -->
+                <!-- PAYMENTS -->
                 <a th:href="@{/admin/payments}"
                    sec:authorize="hasAnyRole('ADMIN','TENANT')"
                    th:classappend="${activePage == 'payments'}
@@ -98,7 +100,19 @@
 
                 </a>
 
-                <!-- Admin Panel -->
+                <!-- MAINTENANCE -->
+                <a th:href="@{/admin/maintenance}"
+                   sec:authorize="hasRole('ADMIN')"
+                   th:classappend="${activePage == 'maintenance'}
+                   ? 'text-blue-600 border-b-2 border-blue-600 pb-1'
+                   : 'text-gray-700'"
+                   class="hover:text-blue-600 font-medium transition">
+
+                    Maintenance
+
+                </a>
+
+                <!-- ADMIN DASHBOARD -->
                 <a th:href="@{/admin/dashboard}"
                    sec:authorize="hasRole('ADMIN')"
                    th:classappend="${activePage == 'admin-dashboard'}
@@ -110,7 +124,7 @@
 
                 </a>
 
-                <!-- Logout -->
+                <!-- LOGOUT -->
                 <form th:action="@{/logout}"
                       method="post"
                       sec:authorize="isAuthenticated()">
@@ -129,11 +143,10 @@
 
             </div>
 
-            <!-- Mobile Hamburger -->
+            <!-- MOBILE HAMBURGER -->
             <button @click="open = !open"
                     class="md:hidden text-gray-700">
 
-                <!-- Hamburger Icon -->
                 <svg xmlns="http://www.w3.org/2000/svg"
                      class="h-8 w-8"
                      fill="none"
@@ -151,64 +164,95 @@
 
         </div>
 
-        <!-- Mobile Menu -->
+        <!-- MOBILE MENU -->
         <div x-show="open"
              x-transition
              class="md:hidden py-4 space-y-4 border-t">
 
-            <!-- Home -->
+            <!-- HOME -->
             <a th:href="@{/}"
-               class="block text-gray-700 hover:text-blue-600 font-medium">
+               th:classappend="${activePage == 'home'}
+               ? 'text-blue-600 font-semibold'
+               : 'text-gray-700'"
+               class="block hover:text-blue-600 font-medium">
 
                 Home
 
             </a>
 
-            <!-- Register -->
+            <!-- REGISTER -->
             <a th:href="@{/register}"
-               class="block text-gray-700 hover:text-blue-600 font-medium">
+               sec:authorize="!isAuthenticated()"
+               th:classappend="${activePage == 'register'}
+               ? 'text-blue-600 font-semibold'
+               : 'text-gray-700'"
+               class="block hover:text-blue-600 font-medium">
 
                 Register
 
             </a>
 
-            <!-- Login -->
+            <!-- LOGIN -->
             <a th:href="@{/login}"
                sec:authorize="!isAuthenticated()"
-               class="block text-gray-700 hover:text-blue-600 font-medium">
+               th:classappend="${activePage == 'login'}
+               ? 'text-blue-600 font-semibold'
+               : 'text-gray-700'"
+               class="block hover:text-blue-600 font-medium">
 
                 Login
 
             </a>
 
-            <!-- Tenant Dashboard -->
+            <!-- TENANT DASHBOARD -->
             <a th:href="@{/tenant/dashboard}"
                sec:authorize="hasRole('TENANT')"
-               class="block text-gray-700 hover:text-blue-600 font-medium">
+               th:classappend="${activePage == 'tenant-dashboard'}
+               ? 'text-blue-600 font-semibold'
+               : 'text-gray-700'"
+               class="block hover:text-blue-600 font-medium">
 
                 Dashboard
 
             </a>
 
-            <!-- Payments -->
+            <!-- PAYMENTS -->
             <a th:href="@{/admin/payments}"
                sec:authorize="hasAnyRole('ADMIN','TENANT')"
-               class="block text-gray-700 hover:text-blue-600 font-medium">
+               th:classappend="${activePage == 'payments'}
+               ? 'text-blue-600 font-semibold'
+               : 'text-gray-700'"
+               class="block hover:text-blue-600 font-medium">
 
                 Payments
 
             </a>
 
-            <!-- Admin -->
+            <!-- MAINTENANCE -->
+            <a th:href="@{/admin/maintenance}"
+               sec:authorize="hasRole('ADMIN')"
+               th:classappend="${activePage == 'maintenance'}
+               ? 'text-blue-600 font-semibold'
+               : 'text-gray-700'"
+               class="block hover:text-blue-600 font-medium">
+
+                Maintenance
+
+            </a>
+
+            <!-- ADMIN -->
             <a th:href="@{/admin/dashboard}"
                sec:authorize="hasRole('ADMIN')"
-               class="block text-gray-700 hover:text-blue-600 font-medium">
+               th:classappend="${activePage == 'admin-dashboard'}
+               ? 'text-blue-600 font-semibold'
+               : 'text-gray-700'"
+               class="block hover:text-blue-600 font-medium">
 
                 Admin
 
             </a>
 
-            <!-- Logout -->
+            <!-- LOGOUT -->
             <form th:action="@{/logout}"
                   method="post"
                   sec:authorize="isAuthenticated()">

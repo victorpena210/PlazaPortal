@@ -44,7 +44,7 @@
 
             <p class="text-gray-600 mt-3 text-lg">
 
-                Securely pay your monthly rent online using Stripe.
+                Securely pay your monthly rent online.
 
             </p>
 
@@ -103,7 +103,7 @@
 
             </h2>
 
-            <form th:action="@{/tenant/payments/checkout}"
+            <form th:action="@{/tenant/payments/create}"
                   method="post"
                   class="space-y-8">
 
@@ -170,28 +170,6 @@
 
                 </div>
 
-                <!-- Stripe Button -->
-                <div>
-
-                    <button type="submit"
-
-                            class="w-full bg-indigo-600
-                                   hover:bg-indigo-700
-
-                                   text-white text-lg
-                                   font-semibold
-
-                                   py-4 rounded-xl
-
-                                   shadow-lg
-                                   transition
-
-                                   hover:scale-[1.01]
-                                   active:scale-[0.99]">
-
-                        Continue to Stripe
-
-                    </button>
 
                 </div>
 

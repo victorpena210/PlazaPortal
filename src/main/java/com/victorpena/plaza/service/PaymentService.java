@@ -82,14 +82,13 @@ public class PaymentService {
     }
     
     @Transactional
-    public Payment markPaymentAsPaid(String stripeSessionId) {
-        Payment payment = paymentRepository.findByStripeSessionId(stripeSessionId)
-                .orElseThrow(() -> new IllegalArgumentException("Payment not found for Stripe session"));
-        
-     // Prevent duplicate webhook processing
-        if (payment.getStatus() == PaymentStatus.PAID) {
-            return payment;
-        }
+    public Payment markAsPaid(Long paymentId) {
+
+        Payment payment = paymentRepository.findById(paymentId)
+                .orElseThrow(() ->
+                        new IllegalArgumentException(
+                                "Payment not found: " + paymentId
+                        ));
 
         payment.setStatus(PaymentStatus.PAID);
         payment.setPaidAt(LocalDateTime.now());
@@ -97,37 +96,4 @@ public class PaymentService {
         return paymentRepository.save(payment);
     }
     
-    @Transactional
-    public Payment markPaymentAsFailed(String stripeSessionId) {
-        Payment payment = paymentRepository.findByStripeSessionId(stripeSessionId)
-                .orElseThrow(() -> new IllegalArgumentException("Payment not found for Stripe session"));
-
-        payment.setStatus(PaymentStatus.FAILED);
-
-        return paymentRepository.save(payment);
-    }
-    
-    @Transactional
-    public Payment attachStripeSession(Long paymentId, String stripeSessionId) {
-    	Payment payment = paymentRepository.findById(paymentId)
-    			.orElseThrow(() -> new IllegalArgumentException("payment not found: " + paymentId));
-    	payment.setStripeSessionId(stripeSessionId);
-    	return paymentRepository.save(payment);
-    }
-
-    
-    @Transactional
-    public Payment markPaymentAsCanceled(String stripeSessionId) {
-
-        Payment payment = paymentRepository
-                .findByStripeSessionId(stripeSessionId)
-                .orElseThrow(() ->
-                        new IllegalArgumentException(
-                                "Payment not found for Stripe session"
-                        ));
-
-        payment.setStatus(PaymentStatus.CANCELLED);
-
-        return paymentRepository.save(payment);
-    }
 }

@@ -52,11 +52,17 @@ public class Payment {
 	@Column(name = "payment_month", nullable = false, length = 7)
 	private String paymentMonth;
 	
-	@Column(name = "stripe_session_id")
-	private String stripeSessionId;
+	@Column(name = "payment_method")
+	private String paymentMethod;
 	
-    private String stripePaymentIntentId;
-    
+	@Column(name = "transaction_reference")
+	private String transactionReference;
+	
+	@Column(name = "late_fee", precision = 10, scale = 2)
+	private BigDecimal lateFee = BigDecimal.ZERO;
+	
+	@Column(name = "total_amount", precision = 10, scale = 2)
+	private BigDecimal totalAmount;    
     private String receiptUrl;
 
 	
@@ -132,13 +138,7 @@ public class Payment {
 	    this.paymentMonth = paymentMonth;
 	}
 
-	public String getStripeSessionId() {
-		return stripeSessionId;
-	}
 
-	public void setStripeSessionId(String stripeSessionId) {
-		this.stripeSessionId = stripeSessionId;
-	}
 
 	public LocalDateTime getCreatedAt() {
 		return createdAt;
@@ -148,13 +148,7 @@ public class Payment {
 		this.createdAt = createdAt;
 	}
 
-	public String getStripePaymentIntentId() {
-		return stripePaymentIntentId;
-	}
 
-	public void setStripePaymentIntentId(String stripePaymentIntentId) {
-		this.stripePaymentIntentId = stripePaymentIntentId;
-	}
 
 	public LocalDateTime getUpdatedAt() {
 		return updatedAt;
@@ -171,6 +165,40 @@ public class Payment {
 	public void setReceiptUrl(String receiptUrl) {
 		this.receiptUrl = receiptUrl;
 	}
+
+	public String getPaymentMethod() {
+		return paymentMethod;
+	}
+
+	public void setPaymentMethod(String paymentMethod) {
+		this.paymentMethod = paymentMethod;
+	}
+
+	public String getTransactionReference() {
+		return transactionReference;
+	}
+
+	public void setTransactionReference(String transactionReference) {
+		this.transactionReference = transactionReference;
+	}
+
+	public BigDecimal getLateFee() {
+		return lateFee;
+	}
+
+	public void setLateFee(BigDecimal lateFee) {
+		this.lateFee = lateFee;
+	}
+
+	public BigDecimal getTotalAmount() {
+		return totalAmount;
+	}
+
+	public void setTotalAmount(BigDecimal totalAmount) {
+		this.totalAmount = totalAmount;
+	}
+	
+	
 	
 	
 }
