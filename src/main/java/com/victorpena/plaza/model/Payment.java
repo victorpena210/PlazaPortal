@@ -49,8 +49,8 @@ public class Payment {
 	@JoinColumn(name = "office_id", nullable = false)
 	private Office office;
 
-	@Column(name = "payment_month", nullable = false, length = 7)
-	private String paymentMonth;
+//	@Column(name = "payment_month", nullable = false, length = 7)
+//	private String paymentMonth;
 	
 	@Column(name = "payment_method")
 	private String paymentMethod;
@@ -65,6 +65,9 @@ public class Payment {
 	private BigDecimal totalAmount;    
     private String receiptUrl;
 
+    @ManyToOne
+    @JoinColumn(name = "invoice_id")
+    private Invoice invoice;
 	
 	public Payment() {
 		
@@ -130,13 +133,6 @@ public class Payment {
 		this.office = office;
 	}
 	
-	public String getPaymentMonth() {
-	    return paymentMonth;
-	}
-
-	public void setPaymentMonth(String paymentMonth) {
-	    this.paymentMonth = paymentMonth;
-	}
 
 
 
@@ -196,6 +192,14 @@ public class Payment {
 
 	public void setTotalAmount(BigDecimal totalAmount) {
 		this.totalAmount = totalAmount;
+	}
+
+	public Invoice getInvoice() {
+		return invoice;
+	}
+
+	public void setInvoice(Invoice invoice) {
+		this.invoice = invoice;
 	}
 	
 	

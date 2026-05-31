@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <title>Login</title>
+
+
+</head>
+
+<body>
+
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Amount</th>
+            <th>Due Date</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <tr th:each="invoice : ${invoices}">
+            <td th:text="${invoice.id}"></td>
+            <td th:text="${invoice.amount}"></td>
+            <td th:text="${invoice.dueDate}"></td>
+            <td th:text="${invoice.status}"></td>
+
+			<td>
+			    <a th:if="${invoice.status.name() == 'PENDING'}"
+			       th:href="@{/tenant/pay/{id}(id=${invoice.id})}">
+			        Pay
+			    </a>
+
+			    <span th:if="${invoice.status.name() == 'PAID'}">
+			        Paid
+			    </span>
+			</td>
+        </tr>
+    </tbody>
+</table>
+
+</body>
+
+</html>

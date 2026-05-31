@@ -2,26 +2,26 @@ package com.victorpena.plaza.model;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-
-import org.springframework.format.annotation.DurationFormat.Unit;
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
 @Entity
+@Table(name = "leases")
 public class Lease {
 
-    @Id
-    @GeneratedValue
-    private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
     @ManyToOne
     private User tenant;
 
     @ManyToOne
-    private Unit unit;
+    private Office office;
 
     private BigDecimal monthlyRent;
 
@@ -47,13 +47,17 @@ public class Lease {
 		this.tenant = tenant;
 	}
 
-	public Unit getUnit() {
-		return unit;
-	}
 
-	public void setUnit(Unit unit) {
-		this.unit = unit;
+
+	public void setOffice(Office office) {
+		this.office = office;
 	}
+	
+	public Office getOffice() {
+		return office;
+	}
+    
+	
 
 	public BigDecimal getMonthlyRent() {
 		return monthlyRent;
@@ -86,6 +90,7 @@ public class Lease {
 	public void setActive(boolean active) {
 		this.active = active;
 	}
-    
+
+
 	
 }

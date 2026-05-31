@@ -9,9 +9,12 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.victorpena.plaza.model.Invoice;
+import com.victorpena.plaza.model.InvoiceStatus;
 import com.victorpena.plaza.model.Office;
 import com.victorpena.plaza.model.Payment;
 import com.victorpena.plaza.model.User;
+import com.victorpena.plaza.repository.InvoiceRepository;
 import com.victorpena.plaza.repository.OfficeRepository;
 import com.victorpena.plaza.repository.PaymentRepository;
 import com.victorpena.plaza.repository.UserRepository;
@@ -20,71 +23,17 @@ import org.springframework.transaction.annotation.Transactional;
 public class PaymentService {
 
     private final PaymentRepository paymentRepository;
-    private final UserRepository userRepository;
-    private final OfficeRepository officeRepository;
+
+    private final InvoiceRepository invoiceRepository;
 
     public PaymentService(
             PaymentRepository paymentRepository,
-            UserRepository userRepository,
-            OfficeRepository officeRepository) {
+            OfficeRepository officeRepository, InvoiceRepository invoiceRepository) {
         this.paymentRepository = paymentRepository;
-        this.userRepository = userRepository;
-        this.officeRepository = officeRepository;
+        this.invoiceRepository = invoiceRepository;
     }
 
-    @Transactional
-    public Payment createPayment(Long userId, Long officeId, String paymentMonth) {
-        if (paymentMonth == null || paymentMonth.isBlank()) {
-            throw new IllegalArgumentException("Payment month is required.");
-        }
-
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
-
-        Office office = officeRepository.findById(officeId)
-                .orElseThrow(() -> new IllegalArgumentException("Office not found: " + officeId));
-
-        if (office.getUser() == null || !office.getUser().getId().equals(userId)) {
-            throw new IllegalArgumentException("You can only pay for your assigned office.");
-        }
-
-        boolean existingPayment =
-        	    paymentRepository.existsByOfficeIdAndPaymentMonthAndStatusIn(
-        	        officeId,
-        	        paymentMonth,
-        	        List.of(
-        	            PaymentStatus.PENDING,
-        	            PaymentStatus.PAID
-        	        )
-        	    );
-
-        	if(existingPayment) {
-        	    throw new IllegalArgumentException(
-        	        "A payment already exists for this month."
-        	    );
-        	}
-
-        Payment payment = new Payment();
-        
-        BigDecimal rent = office.getMonthlyRent();
-        BigDecimal lateFee = BigDecimal.ZERO;
-
-        if (LocalDate.now().getDayOfMonth() > 5) {
-            lateFee = new BigDecimal("75.00");
-        }
-
-        payment.setUser(user);
-        payment.setOffice(office);
-        payment.setAmount(rent);
-        payment.setLateFee(lateFee);
-        payment.setTotalAmount(rent.add(lateFee));       
-        payment.setPaymentMonth(paymentMonth);
-        payment.setStatus(PaymentStatus.PENDING);
-        payment.setCreatedAt(LocalDateTime.now());
-
-        return paymentRepository.save(payment);
-    }
-    
+   
     public List<Payment> findByUserId(Long userId) {
         return paymentRepository.findByUserIdOrderByCreatedAtDesc(userId);
     }
@@ -106,6 +55,44 @@ public class PaymentService {
         payment.setPaidAt(LocalDateTime.now());
 
         return paymentRepository.save(payment);
+    }
+    
+    @Transactional
+    public Payment createPayment(Invoice invoice) {
+    	
+    	Payment payment = new Payment();
+    	
+    	payment.setInvoice(invoice);
+    	payment.setUser(invoice.getLease().getTenant());
+    	payment.setOffice(invoice.getLease().getOffice());
+    	payment.setAmount(invoice.getAmount());
+    	payment.setTotalAmount(invoice.getAmount());
+    	payment.setStatus(PaymentStatus.PENDING);
+    	
+    	return paymentRepository.save(payment);
+    }
+    
+    @Transactional
+    public void completePayment(Long invoiceId) {
+
+        Invoice invoice = invoiceRepository.findById(invoiceId)
+                .orElseThrow();
+
+        if (invoice.getStatus() == InvoiceStatus.PAID) {
+            throw new RuntimeException("Invoice already paid");
+        }
+
+        Payment payment =
+                paymentRepository.findByInvoiceId(invoiceId)
+                .orElseThrow();
+
+        payment.setStatus(PaymentStatus.PAID);
+        payment.setPaidAt(LocalDateTime.now());
+
+        invoice.setStatus(InvoiceStatus.PAID);
+
+        paymentRepository.save(payment);
+        invoiceRepository.save(invoice);
     }
     
 }

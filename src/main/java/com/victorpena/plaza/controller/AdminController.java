@@ -1,6 +1,8 @@
 package com.victorpena.plaza.controller;
 
 import com.victorpena.plaza.model.MaintenanceRequestStatus;
+import com.victorpena.plaza.repository.InvoiceRepository;
+import com.victorpena.plaza.repository.LeaseRepository;
 import com.victorpena.plaza.service.MaintenanceRequestService;
 import com.victorpena.plaza.service.OfficeService;
 import com.victorpena.plaza.service.PaymentService;
@@ -23,17 +25,22 @@ public class AdminController {
     private final UserService userService;
     private final MaintenanceRequestService maintenanceRequestService;
     private final PaymentService paymentService;
+    private final LeaseRepository leaseRepository;
+    private final InvoiceRepository invoiceRepository;
 
     public AdminController(
             OfficeService officeService,
             UserService userService,
             MaintenanceRequestService maintenanceRequestService,
-            PaymentService paymentService) {
+            PaymentService paymentService,
+            LeaseRepository leaseRepository, InvoiceRepository invoiceRepository) {
 
         this.officeService = officeService;
         this.userService = userService;
         this.maintenanceRequestService = maintenanceRequestService;
         this.paymentService = paymentService;
+        this.leaseRepository = leaseRepository;
+        this.invoiceRepository = invoiceRepository;
     }
 
     /*
@@ -244,6 +251,26 @@ public class AdminController {
 
         return "redirect:/admin/dashboard";
     }
+    
+    
+    /*
+     * =========================================
+     * LEASES PAGE
+     * =========================================
+     */
+    
+    @GetMapping("/leases")
+    public String leases(Model model) {
+    	
+    	model.addAttribute("leases", leaseRepository.findAll());
+    	
+    	model.addAttribute("activePage", "leases");
+    	
+    	return "admin-leases";
+    }
+
+    
+    
 
     /*
      * =========================================

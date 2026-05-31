@@ -3,25 +3,20 @@ package com.victorpena.plaza.repository;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.springframework.data.jpa.repository.JpaRepository;
+
 import com.victorpena.plaza.model.Invoice;
 import com.victorpena.plaza.model.InvoiceStatus;
 import com.victorpena.plaza.model.Lease;
+import com.victorpena.plaza.model.User;
 
-public class InvoiceRepository {
+public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
+    boolean existsByLeaseAndDueDate(
+            Lease lease,
+            LocalDate dueDate);
 
-	public boolean existsByLeaseAndDueDate(Lease lease, LocalDate nextMonth) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	public void save(Invoice invoice) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public List<Invoice> findByStatus(InvoiceStatus pending) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
+    List<Invoice> findByStatus(
+            InvoiceStatus status);
+    
+    List<Invoice> findByLeaseTenant(User tenant);
 }

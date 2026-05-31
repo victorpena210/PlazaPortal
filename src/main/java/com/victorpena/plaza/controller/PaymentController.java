@@ -9,56 +9,39 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.victorpena.plaza.model.Invoice;
 import com.victorpena.plaza.model.User;
+import com.victorpena.plaza.repository.InvoiceRepository;
 
 @Controller
 public class PaymentController {
 	
-	private UserService userService;
 	private PaymentService paymentService;
+	private InvoiceRepository invoiceRepository;
 	
-	public PaymentController(UserService userService, PaymentService paymentService) {
-		this.userService = userService;
+	public PaymentController(PaymentService paymentService, InvoiceRepository invoiceRepository) {
 		this.paymentService = paymentService;
+		this.invoiceRepository = invoiceRepository;
 	}
 	
-	@PostMapping("/tenant/payments/create")
-	public String createPayment(
-			@RequestParam Long officeId,
-			@RequestParam String paymentMonth,
-			Authentication authentication,
-			RedirectAttributes redirectAttributes
-			) {
-		User user = userService.findByEmail(authentication.getName())
-		        .orElseThrow(() -> new IllegalArgumentException("User not found"));
+	@PostMapping("/tenant/payments")
+	public String submitPayment(@RequestParam Long invoiceId) {
 		
-		paymentService.createPayment(
-				user.getId(),
-				officeId,
-				paymentMonth);
+		Invoice invoice = invoiceRepository.findById(invoiceId).orElseThrow();
 		
-		redirectAttributes.addFlashAttribute(
-				"success",
-				"Payment request submitted successfully."
-				);
+		paymentService.createPayment(invoice);
 		
 		return "redirect:/tenant/payments";
 	}
 	
-	@PostMapping("/admin/payments/{id}/approve")
-	public String approvePayment(
-	        @PathVariable Long id,
-	        RedirectAttributes redirectAttributes
-	) {
-
-	    paymentService.markAsPaid(id);
-
-	    redirectAttributes.addFlashAttribute(
-	            "success",
-	            "Payment approved successfully."
-	    );
-
-	    return "redirect:/admin/payments";
+	@PostMapping("/pay/{invoiceId}")
+	public String payInvoice(@PathVariable Long invoiceId) {
+		paymentService.completePayment(invoiceId);
+		
+		return "redirect:/tenant/invoice";
 	}
+	
+
+	
 
 }

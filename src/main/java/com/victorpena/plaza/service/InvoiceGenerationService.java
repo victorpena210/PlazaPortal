@@ -7,22 +7,22 @@ import com.victorpena.plaza.repository.InvoiceRepository;
 import com.victorpena.plaza.repository.LeaseRepository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-
-import lombok.RequiredArgsConstructor;
-
 @Service
-@RequiredArgsConstructor
 public class InvoiceGenerationService {
 	
-	private LeaseRepository leaseRepository;
-	private InvoiceRepository invoiceRepository;
+	private final LeaseRepository leaseRepository;
+	private final InvoiceRepository invoiceRepository;
 	
-
+	public InvoiceGenerationService(LeaseRepository leaseRepository, InvoiceRepository invoiceRepository) {
+		this.leaseRepository = leaseRepository;
+		this.invoiceRepository = invoiceRepository;
+	}
 
 	@Scheduled(cron = "0 0 1 * * *")
 	public void generateInvoices() {
@@ -59,6 +59,11 @@ public class InvoiceGenerationService {
 	            invoice.setStatus(
 	                InvoiceStatus.PENDING
 	            );
+	            
+	            invoice.setCreatedAt(
+	                    LocalDateTime.now()
+	                );
+
 
 	            invoiceRepository.save(invoice);
 	        }

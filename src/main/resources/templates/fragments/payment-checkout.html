@@ -1,0 +1,6 @@
+Invoice #: ${invoice.id}
+Amount: ${invoice.amount}
+
+<form th:action="@{/pay/{id}(id=${invoice.id})}" method="post">
+    <button type="submit">Pay Now</button>
+</form>

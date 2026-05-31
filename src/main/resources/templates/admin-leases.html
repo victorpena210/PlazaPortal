@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+	
+</head>
+<body>
+	<h1>Leases</h1>
+
+	<table>
+	    <tr>
+	        <th>ID</th>
+	        <th>Tenant</th>
+	        <th>Start Date</th>
+	        <th>End Date</th>
+	    </tr>
+
+	    <tr th:each="lease : ${leases}">
+	        <td th:text="${lease.id}"></td>
+	        <td th:text="${lease.tenant.fullName}"></td>
+	        <td th:text="${lease.startDate}"></td>
+	        <td th:text="${lease.endDate}"></td>
+	    </tr>
+	</table>
+	
+</body>
