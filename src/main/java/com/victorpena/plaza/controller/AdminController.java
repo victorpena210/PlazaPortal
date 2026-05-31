@@ -1,12 +1,19 @@
 package com.victorpena.plaza.controller;
 
 import com.victorpena.plaza.model.MaintenanceRequestStatus;
-import com.victorpena.plaza.repository.InvoiceRepository;
+import com.victorpena.plaza.model.TenantInvitation;
 import com.victorpena.plaza.repository.LeaseRepository;
+import com.victorpena.plaza.repository.TenantInvitationRepository;
 import com.victorpena.plaza.service.MaintenanceRequestService;
 import com.victorpena.plaza.service.OfficeService;
 import com.victorpena.plaza.service.PaymentService;
 import com.victorpena.plaza.service.UserService;
+
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -26,21 +33,23 @@ public class AdminController {
     private final MaintenanceRequestService maintenanceRequestService;
     private final PaymentService paymentService;
     private final LeaseRepository leaseRepository;
-    private final InvoiceRepository invoiceRepository;
+    private final TenantInvitationRepository invitationRepository;
+    private final JavaMailSender mailSender;
 
     public AdminController(
             OfficeService officeService,
             UserService userService,
             MaintenanceRequestService maintenanceRequestService,
             PaymentService paymentService,
-            LeaseRepository leaseRepository, InvoiceRepository invoiceRepository) {
+            LeaseRepository leaseRepository, TenantInvitationRepository invitationRepository, JavaMailSender mailSender) {
 
         this.officeService = officeService;
         this.userService = userService;
         this.maintenanceRequestService = maintenanceRequestService;
         this.paymentService = paymentService;
         this.leaseRepository = leaseRepository;
-        this.invoiceRepository = invoiceRepository;
+        this.invitationRepository = invitationRepository;
+        this.mailSender = mailSender;
     }
 
     /*
@@ -290,5 +299,77 @@ public class AdminController {
 
         return "admin-payments";
     }
+    
+    /*
+     * =========================================
+     * tenant invitation
+     * =========================================
+     */
+    
+    @PostMapping("/invite")
+    public String inviteTenant(
+            @RequestParam String email,
+            RedirectAttributes redirectAttributes) {
 
+        try {
+
+            // Create invitation
+            TenantInvitation invitation = new TenantInvitation();
+
+            invitation.setEmail(email);
+            invitation.setToken(UUID.randomUUID().toString());
+            invitation.setExpiresAt(LocalDateTime.now().plusDays(7));
+            invitation.setUsed(false);
+
+            invitationRepository.save(invitation);
+
+            // Registration link
+            String registrationLink =
+                    "http://localhost:8080/register?token="
+                            + invitation.getToken();
+
+            // Email
+            SimpleMailMessage message =
+                    new SimpleMailMessage();
+
+            message.setFrom("13victor.pena@gmail.com");
+            message.setTo(email);
+
+            message.setSubject(
+                    "Peña Plaza Tenant Registration");
+
+            message.setText(
+                    "You have been invited to register for Peña Plaza.\n\n"
+                            + "Click the link below to create your account:\n\n"
+                            + registrationLink);
+
+            // Send email
+            mailSender.send(message);
+
+            redirectAttributes.addFlashAttribute(
+                    "successMessage",
+                    "Invitation email sent to " + email);
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+            redirectAttributes.addFlashAttribute(
+                    "errorMessage",
+                    "Unable to send email. Gmail SMTP connection failed.");
+
+        }
+
+        return "redirect:/admin/tenants";
+    }
+    
+    @GetMapping("/tenants")
+    public String manageTenants(Model model) {
+
+        model.addAttribute("tenants", userService.findTenants());
+
+        model.addAttribute("activePage", "tenants");
+
+        return "manage-tenants";
+    }
 }

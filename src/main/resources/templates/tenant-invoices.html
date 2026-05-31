@@ -31,14 +31,19 @@
             <td th:text="${invoice.status}"></td>
 
 			<td>
-			    <a th:if="${invoice.status.name() == 'PENDING'}"
-			       th:href="@{/tenant/pay/{id}(id=${invoice.id})}">
-			        Pay
-			    </a>
 
-			    <span th:if="${invoice.status.name() == 'PAID'}">
-			        Paid
-			    </span>
+				<form th:if="${invoice.status.name() == 'PENDING'}"
+				      th:action="@{/pay/{id}(id=${invoice.id})}"
+				      method="post">
+
+				    <input type="hidden"
+				           th:name="${_csrf.parameterName}"
+				           th:value="${_csrf.token}" />
+
+				    <button type="submit">Pay</button>
+
+				</form>s
+
 			</td>
         </tr>
     </tbody>

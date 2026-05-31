@@ -22,6 +22,8 @@ public class RegistrationForm {
 	
 	@NotBlank(message = "Please confirm your password")
 	private String confirmPassword;
+	
+	private String token;
 
 	public String getFirstName() {
 		return firstName;
@@ -62,8 +64,14 @@ public class RegistrationForm {
 	public void setConfirmPassword(String confirmPassword) {
 		this.confirmPassword = confirmPassword;
 	}
+
+	public String getToken() {
+		return token;
+	}
 	
-	
+	public void setToken(String token) {
+		this.token = token;
+	}
 	
 
 
