@@ -11,4 +11,7 @@ import com.victorpena.plaza.model.TenantInvitation;
 public interface TenantInvitationRepository extends JpaRepository<TenantInvitation, Long> {
 
 	Optional<TenantInvitation> findByToken(String token);
+	
+	Optional<TenantInvitation> findByEmailAndUsedFalse(String email);
+
 }

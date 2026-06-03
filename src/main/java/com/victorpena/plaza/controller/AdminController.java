@@ -4,6 +4,7 @@ import com.victorpena.plaza.model.MaintenanceRequestStatus;
 import com.victorpena.plaza.model.TenantInvitation;
 import com.victorpena.plaza.repository.LeaseRepository;
 import com.victorpena.plaza.repository.TenantInvitationRepository;
+import com.victorpena.plaza.repository.UserRepository;
 import com.victorpena.plaza.service.MaintenanceRequestService;
 import com.victorpena.plaza.service.OfficeService;
 import com.victorpena.plaza.service.PaymentService;
@@ -23,7 +24,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
+import java.util.Optional;
 @Controller
 @RequestMapping("/admin")
 public class AdminController {
@@ -35,8 +36,10 @@ public class AdminController {
     private final LeaseRepository leaseRepository;
     private final TenantInvitationRepository invitationRepository;
     private final JavaMailSender mailSender;
+    private final UserRepository userRepository;
 
     public AdminController(
+    		UserRepository userRepository,
             OfficeService officeService,
             UserService userService,
             MaintenanceRequestService maintenanceRequestService,
@@ -50,6 +53,7 @@ public class AdminController {
         this.leaseRepository = leaseRepository;
         this.invitationRepository = invitationRepository;
         this.mailSender = mailSender;
+        this.userRepository = userRepository;
     }
 
     /*
@@ -312,7 +316,29 @@ public class AdminController {
             RedirectAttributes redirectAttributes) {
 
         try {
+        	
+        	if (userRepository.existsByEmail(email)) {
 
+        	    redirectAttributes.addFlashAttribute(
+        	            "errorMessage",
+        	            "A user with this email already exists.");
+
+        	    return "redirect:/admin/tenants";
+        	}
+        	
+        	Optional<TenantInvitation> existingInvite =
+        	        invitationRepository.findByEmailAndUsedFalse(email);
+
+        	if (existingInvite.isPresent()
+        	        && existingInvite.get().getExpiresAt()
+        	                .isAfter(LocalDateTime.now())) {
+
+        	    redirectAttributes.addFlashAttribute(
+        	            "errorMessage",
+        	            "An active invitation has already been sent to this email.");
+
+        	    return "redirect:/admin/tenants";
+        	}
             // Create invitation
             TenantInvitation invitation = new TenantInvitation();
 
