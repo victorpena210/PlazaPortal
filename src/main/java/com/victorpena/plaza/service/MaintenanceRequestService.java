@@ -8,6 +8,7 @@ import com.victorpena.plaza.model.MaintenanceRequest;
 import com.victorpena.plaza.model.MaintenanceRequestStatus;
 import com.victorpena.plaza.model.Office;
 import com.victorpena.plaza.model.User;
+import com.victorpena.plaza.repository.LeaseRepository;
 import com.victorpena.plaza.repository.MaintenanceRequestRepository;
 import com.victorpena.plaza.repository.OfficeRepository;
 import com.victorpena.plaza.repository.UserRepository;
@@ -18,14 +19,16 @@ public class MaintenanceRequestService {
     private final MaintenanceRequestRepository maintenanceRequestRepository;
     private final OfficeRepository officeRepository;
     private final UserRepository userRepository;
+    private final LeaseRepository leaseRepository;
 
     public MaintenanceRequestService(
             MaintenanceRequestRepository maintenanceRequestRepository,
             OfficeRepository officeRepository,
-            UserRepository userRepository) {
+            UserRepository userRepository, LeaseRepository leaseRepository) {
     	this.maintenanceRequestRepository = maintenanceRequestRepository;
     	this.officeRepository = officeRepository;
     	this.userRepository = userRepository;
+    	this.leaseRepository = leaseRepository;
     }
 
     public MaintenanceRequest createRequest(Long userId, Long officeId, String title, String description) {
@@ -35,9 +38,10 @@ public class MaintenanceRequestService {
         Office office = officeRepository.findById(officeId)
                 .orElseThrow(() -> new IllegalArgumentException("Office not found: " + officeId));
 
-        if (office.getUser() == null || !office.getUser().getId().equals(userId)) {
-            throw new IllegalArgumentException("You can only submit requests for your assigned office.");
-        }
+        leaseRepository
+        .findByTenantIdAndOfficeIdAndActiveTrue(userId, officeId)
+        .orElseThrow(() -> new IllegalArgumentException(
+                "You can only submit requests for your leased office."));
 
         MaintenanceRequest request = new MaintenanceRequest();
         request.setUser(user);

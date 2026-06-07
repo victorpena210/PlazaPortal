@@ -1,7 +1,5 @@
 package com.victorpena.plaza.model;
 
-import java.util.ArrayList;
-import java.util.List;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -10,7 +8,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+
 import jakarta.persistence.Table;
 
 @Entity
@@ -40,8 +38,7 @@ public class User {
     @Column(nullable = false)
     private boolean enabled = true;
     
-    @OneToMany(mappedBy = "user")
-    private List<Office> offices = new ArrayList<>();
+
 
     public User() {
     }
@@ -102,11 +99,5 @@ public class User {
         this.enabled = enabled;
     }
     
-    public List<Office> getOffices() {
-        return offices;
-    }
 
-    public void setOffices(List<Office> offices) {
-        this.offices = offices;
-    }
 }

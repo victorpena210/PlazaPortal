@@ -57,7 +57,7 @@ public class OfficeService {
 	public void markOfficeAsMaintenance(Long officeId) {
 		Office office = officeRepository.findById(officeId)
 				.orElseThrow(() -> new IllegalArgumentException("Office not found: " + officeId));
-		if(office.getUser() != null || office.getStatus() == OfficeStatus.OCCUPIED) {
+		if (office.getStatus() == OfficeStatus.OCCUPIED) {
 			throw new IllegalArgumentException("Occupied office cannot be marked as maintenance.");
 		}
 		
@@ -69,8 +69,9 @@ public class OfficeService {
 	    Office office = officeRepository.findById(officeId)
 	            .orElseThrow(() -> new IllegalArgumentException("Office not found: " + officeId));
 
-	    if (office.getUser() != null) {
-	        throw new IllegalArgumentException("Assigned office cannot be marked as available manually.");
+	    if (office.getStatus() == OfficeStatus.OCCUPIED) {
+	        throw new IllegalArgumentException(
+	            "Occupied office cannot be marked as available.");
 	    }
 
 	    office.setStatus(OfficeStatus.AVAILABLE);
