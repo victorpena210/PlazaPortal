@@ -14,54 +14,61 @@
     <div>
         <label>Tenant</label>
 
-        <select th:field="*{tenant}">
-            <option value="">Select Tenant</option>
+		<select th:field="*{tenantId}" required>
 
-            <option th:each="tenant : ${tenants}"
-                    th:value="${tenant.id}"
-                    th:text="${tenant.firstName + ' ' + tenant.lastName}">
-            </option>
-        </select>
+		    <option value="">Select Tenant</option>
+
+		    <option th:each="tenant : ${tenants}"
+		            th:value="${tenant.id}"
+		            th:text="${tenant.firstName + ' ' + tenant.lastName}">
+		    </option>
+
+		</select>
     </div>
 
     <div>
         <label>Office</label>
 
-        <select th:field="*{office}">
-            <option value="">Select Office</option>
+		<select th:field="*{officeId}" required>
 
-            <option th:each="office : ${offices}"
-                    th:value="${office.id}"
-                    th:text="${office.officeNumber}">
-            </option>
-        </select>
+		    <option value="">Select Office</option>
+
+		    <option th:each="office : ${offices}"
+		            th:value="${office.id}"
+		            th:text="${office.officeNumber}">
+		    </option>
+
+		</select>
     </div>
 
     <div>
         <label>Monthly Rent</label>
 
-        <input type="number"
-               step="0.01"
-               th:field="*{monthlyRent}">
+		<input type="number"
+		       step="0.01"
+		       th:field="*{monthlyRent}"
+		       required>
     </div>
 
     <div>
         <label>Start Date</label>
 
-        <input type="date"
-               th:field="*{startDate}">
+		<input type="date"
+		       th:field="*{startDate}"
+		       required>
     </div>
 
     <div>
         <label>End Date</label>
 
-        <input type="date"
-               th:field="*{endDate}">
+		<input type="date"
+		       th:field="*{endDate}"
+		       required>
     </div>
 
-	<a th:href="@{/admin/lease/new}">
+	<button type="submit">
 	    Create Lease
-	</a>
+	</button>
 
 </form>
 

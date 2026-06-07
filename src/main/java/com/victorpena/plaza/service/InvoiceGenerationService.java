@@ -34,18 +34,31 @@ public class InvoiceGenerationService {
 
 	    List<Lease> activeLeases =
 	            leaseRepository.findByActiveTrue();
-
+	    
+	    
 	    for (Lease lease : activeLeases) {
+
+	        if (lease.getEndDate() == null) {
+	            continue;
+	        }
+
+	        if (LocalDate.now().isAfter(lease.getEndDate())) {
+
+	            lease.setActive(false);
+
+	            leaseRepository.save(lease);
+
+	            continue;
+	        }
 
 	        if (nextMonth.isAfter(lease.getEndDate())) {
 	            continue;
 	        }
 
 	        boolean exists =
-	            invoiceRepository.existsByLeaseAndDueDate(
-	                lease,
-	                nextMonth
-	            );
+	                invoiceRepository.existsByLeaseAndDueDate(
+	                        lease,
+	                        nextMonth);
 
 	        if (!exists) {
 

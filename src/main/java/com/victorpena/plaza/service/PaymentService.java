@@ -1,39 +1,32 @@
 package com.victorpena.plaza.service;
 
-import com.victorpena.plaza.model.PaymentStatus;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.victorpena.plaza.model.Invoice;
 import com.victorpena.plaza.model.InvoiceStatus;
-import com.victorpena.plaza.model.Office;
 import com.victorpena.plaza.model.Payment;
-import com.victorpena.plaza.model.User;
+import com.victorpena.plaza.model.PaymentStatus;
 import com.victorpena.plaza.repository.InvoiceRepository;
-import com.victorpena.plaza.repository.OfficeRepository;
 import com.victorpena.plaza.repository.PaymentRepository;
-import com.victorpena.plaza.repository.UserRepository;
-import org.springframework.transaction.annotation.Transactional;
+
 @Service
 public class PaymentService {
 
     private final PaymentRepository paymentRepository;
-
     private final InvoiceRepository invoiceRepository;
 
     public PaymentService(
             PaymentRepository paymentRepository,
-            OfficeRepository officeRepository, InvoiceRepository invoiceRepository) {
+            InvoiceRepository invoiceRepository) {
+
         this.paymentRepository = paymentRepository;
         this.invoiceRepository = invoiceRepository;
     }
 
-   
     public List<Payment> findByUserId(Long userId) {
         return paymentRepository.findByUserIdOrderByCreatedAtDesc(userId);
     }
@@ -41,7 +34,7 @@ public class PaymentService {
     public List<Payment> findAll() {
         return paymentRepository.findAllByOrderByCreatedAtDesc();
     }
-    
+
     @Transactional
     public Payment markAsPaid(Long paymentId) {
 
@@ -56,22 +49,31 @@ public class PaymentService {
 
         return paymentRepository.save(payment);
     }
-    
+
     @Transactional
-    public Payment createPayment(Invoice invoice) {
-    	
-    	Payment payment = new Payment();
-    	
-    	payment.setInvoice(invoice);
-    	payment.setUser(invoice.getLease().getTenant());
-    	payment.setOffice(invoice.getLease().getOffice());
-    	payment.setAmount(invoice.getAmount());
-    	payment.setTotalAmount(invoice.getAmount());
-    	payment.setStatus(PaymentStatus.PENDING);
-    	
-    	return paymentRepository.save(payment);
+    public Payment createPayment(Long invoiceId) {
+
+        Invoice invoice = invoiceRepository.findById(invoiceId)
+                .orElseThrow();
+
+        return createPayment(invoice);
     }
-    
+
+    @Transactional
+    private Payment createPayment(Invoice invoice) {
+
+        Payment payment = new Payment();
+
+        payment.setInvoice(invoice);
+        payment.setUser(invoice.getLease().getTenant());
+        payment.setOffice(invoice.getLease().getOffice());
+        payment.setAmount(invoice.getAmount());
+        payment.setTotalAmount(invoice.getAmount());
+        payment.setStatus(PaymentStatus.PENDING);
+
+        return paymentRepository.save(payment);
+    }
+
     @Transactional
     public void completePayment(Long invoiceId) {
 
@@ -84,7 +86,7 @@ public class PaymentService {
 
         Payment payment =
                 paymentRepository.findByInvoiceId(invoiceId)
-                .orElseThrow();
+                        .orElseThrow();
 
         payment.setStatus(PaymentStatus.PAID);
         payment.setPaidAt(LocalDateTime.now());
@@ -94,5 +96,4 @@ public class PaymentService {
         paymentRepository.save(payment);
         invoiceRepository.save(invoice);
     }
-    
 }

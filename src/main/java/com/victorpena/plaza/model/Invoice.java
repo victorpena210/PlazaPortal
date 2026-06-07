@@ -12,7 +12,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
-import com.victorpena.plaza.model.Lease;
 
 @Entity
 @Table(name = "invoice")

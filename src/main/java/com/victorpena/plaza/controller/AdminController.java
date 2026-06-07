@@ -1,20 +1,13 @@
 package com.victorpena.plaza.controller;
 
 import com.victorpena.plaza.model.MaintenanceRequestStatus;
-import com.victorpena.plaza.model.TenantInvitation;
 import com.victorpena.plaza.repository.LeaseRepository;
-import com.victorpena.plaza.repository.TenantInvitationRepository;
-import com.victorpena.plaza.repository.UserRepository;
+import com.victorpena.plaza.service.InvitationService;
 import com.victorpena.plaza.service.MaintenanceRequestService;
 import com.victorpena.plaza.service.OfficeService;
 import com.victorpena.plaza.service.PaymentService;
 import com.victorpena.plaza.service.UserService;
 
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
-
-import java.time.LocalDateTime;
-import java.util.UUID;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -24,7 +17,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import java.util.Optional;
 @Controller
 @RequestMapping("/admin")
 public class AdminController {
@@ -34,26 +26,22 @@ public class AdminController {
     private final MaintenanceRequestService maintenanceRequestService;
     private final PaymentService paymentService;
     private final LeaseRepository leaseRepository;
-    private final TenantInvitationRepository invitationRepository;
-    private final JavaMailSender mailSender;
-    private final UserRepository userRepository;
+    private final InvitationService invitationService;
 
     public AdminController(
-    		UserRepository userRepository,
             OfficeService officeService,
             UserService userService,
             MaintenanceRequestService maintenanceRequestService,
             PaymentService paymentService,
-            LeaseRepository leaseRepository, TenantInvitationRepository invitationRepository, JavaMailSender mailSender) {
+            LeaseRepository leaseRepository,
+            InvitationService invitationService) {
 
         this.officeService = officeService;
         this.userService = userService;
         this.maintenanceRequestService = maintenanceRequestService;
         this.paymentService = paymentService;
         this.leaseRepository = leaseRepository;
-        this.invitationRepository = invitationRepository;
-        this.mailSender = mailSender;
-        this.userRepository = userRepository;
+        this.invitationService = invitationService;
     }
 
     /*
@@ -99,65 +87,8 @@ public class AdminController {
         return "admin-dashboard";
     }
 
-    /*
-     * =========================================
-     * ASSIGN OFFICE
-     * =========================================
-     */
 
-    @PostMapping("/offices/assign")
-    public String assignOffice(
-            @RequestParam Long officeId,
-            @RequestParam Long userId,
-            RedirectAttributes redirectAttributes) {
-
-        try {
-
-            officeService.assignOfficeToTenant(officeId, userId);
-
-            redirectAttributes.addFlashAttribute(
-                    "successMessage",
-                    "Office assigned successfully.");
-
-        } catch (IllegalArgumentException e) {
-
-            redirectAttributes.addFlashAttribute(
-                    "errorMessage",
-                    e.getMessage());
-        }
-
-        return "redirect:/admin/dashboard";
-    }
-
-    /*
-     * =========================================
-     * UNASSIGN OFFICE
-     * =========================================
-     */
-
-    @PostMapping("/offices/{officeId}/unassign")
-    public String unassignOffice(
-            @PathVariable Long officeId,
-            RedirectAttributes redirectAttributes) {
-
-        try {
-
-            officeService.unassignOffice(officeId);
-
-            redirectAttributes.addFlashAttribute(
-                    "successMessage",
-                    "Office unassigned successfully.");
-
-        } catch (IllegalArgumentException e) {
-
-            redirectAttributes.addFlashAttribute(
-                    "errorMessage",
-                    e.getMessage());
-        }
-
-        return "redirect:/admin/dashboard";
-    }
-
+ 
     /*
      * =========================================
      * MAINTENANCE REQUESTS PAGE
@@ -316,74 +247,24 @@ public class AdminController {
             RedirectAttributes redirectAttributes) {
 
         try {
-        	
-        	if (userRepository.existsByEmail(email)) {
 
-        	    redirectAttributes.addFlashAttribute(
-        	            "errorMessage",
-        	            "A user with this email already exists.");
-
-        	    return "redirect:/admin/tenants";
-        	}
-        	
-        	Optional<TenantInvitation> existingInvite =
-        	        invitationRepository.findByEmailAndUsedFalse(email);
-
-        	if (existingInvite.isPresent()
-        	        && existingInvite.get().getExpiresAt()
-        	                .isAfter(LocalDateTime.now())) {
-
-        	    redirectAttributes.addFlashAttribute(
-        	            "errorMessage",
-        	            "An active invitation has already been sent to this email.");
-
-        	    return "redirect:/admin/tenants";
-        	}
-            // Create invitation
-            TenantInvitation invitation = new TenantInvitation();
-
-            invitation.setEmail(email);
-            invitation.setToken(UUID.randomUUID().toString());
-            invitation.setExpiresAt(LocalDateTime.now().plusDays(7));
-            invitation.setUsed(false);
-
-            invitationRepository.save(invitation);
-
-            // Registration link
-            String registrationLink =
-                    "http://localhost:8080/register?token="
-                            + invitation.getToken();
-
-            // Email
-            SimpleMailMessage message =
-                    new SimpleMailMessage();
-
-            message.setFrom("13victor.pena@gmail.com");
-            message.setTo(email);
-
-            message.setSubject(
-                    "Peña Plaza Tenant Registration");
-
-            message.setText(
-                    "You have been invited to register for Peña Plaza.\n\n"
-                            + "Click the link below to create your account:\n\n"
-                            + registrationLink);
-
-            // Send email
-            mailSender.send(message);
+            invitationService.sendInvitation(email);
 
             redirectAttributes.addFlashAttribute(
                     "successMessage",
                     "Invitation email sent to " + email);
 
-        } catch (Exception e) {
-
-            e.printStackTrace();
+        } catch (IllegalArgumentException e) {
 
             redirectAttributes.addFlashAttribute(
                     "errorMessage",
-                    "Unable to send email. Gmail SMTP connection failed.");
+                    e.getMessage());
 
+        } catch (Exception e) {
+
+            redirectAttributes.addFlashAttribute(
+                    "errorMessage",
+                    "Unable to send email.");
         }
 
         return "redirect:/admin/tenants";

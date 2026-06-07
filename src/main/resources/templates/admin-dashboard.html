@@ -66,6 +66,14 @@
 		<p>
 		    <a th:href="@{/admin/payments}">View Payments</a>
 		</p>
+		
+		<a th:href="@{/admin/lease}">
+		    View Leases
+		</a>
+
+		<a th:href="@{/admin/lease/new}">
+		    Create Lease
+		</a>
 	</div>
 
     <div class="stats">
@@ -88,147 +96,4 @@
 		    <p th:text="${maintenanceOfficeCount}">0</p>
 		</div>
     </div>
-
-    <div class="section">
-        <h2>Assign Office</h2>
-
-        <div th:if="${successMessage}" style="color: green; margin-bottom: 12px;">
-            <p th:text="${successMessage}"></p>
-        </div>
-
-        <div th:if="${errorMessage}" style="color: red; margin-bottom: 12px;">
-            <p th:text="${errorMessage}"></p>
-        </div>
-
-        <form th:action="@{/admin/offices/assign}" method="post">
-            <label for="officeId">Available Office:</label>
-            <select name="officeId" id="officeId" required>
-                <option value="" disabled selected>Select an office</option>
-                <option th:each="office : ${availableOffices}"
-                        th:value="${office.id}"
-                        th:text="${office.officeNumber + ' - $' + office.monthlyRent}">
-                </option>
-            </select>
-
-            <label for="userId" style="margin-left: 16px;">Tenant:</label>
-            <select name="userId" id="userId" required>
-                <option value="" disabled selected>Select a tenant</option>
-                <option th:each="tenant : ${tenants}"
-                        th:value="${tenant.id}"
-                        th:text="${tenant.firstName + ' ' + tenant.lastName + ' (' + tenant.email + ')'}">
-                </option>
-            </select>
-
-            <button type="submit" style="margin-left: 16px;">Assign Office</button>
-        </form>
-    </div>
-	
-	<a th:href="@{/admin/tenants}">
-	    Manage Tenants
-	</a>
-
-    <div class="section">
-        <h2>All Offices</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Office Number</th>
-                    <th>Square Feet</th>
-                    <th>Monthly Rent</th>
-					<th>Description</th>
-
-                    <th>Status</th>
-                    <th>Tenant</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr th:each="office : ${offices}">
-                    <td th:text="${office.officeNumber}">1</td>
-                    <td th:text="${office.squareFeet}">500</td>
-                    <td th:text="${office.monthlyRent}">$0.00</td>
-					<td th:text="${office.description != null && !#strings.isEmpty(office.description) ? office.description : 'No description'}">
-					    No description
-					</td>
-                    <td th:text="${office.status}">AVAILABLE</td>
-                    <td th:text="${office.user != null ? office.user.firstName + ' ' + office.user.lastName : 'Unassigned'}">
-                        Unassigned
-                    </td>
-					<td>
-					    <form th:if="${office.user != null}"
-					          th:action="@{/admin/offices/{officeId}/unassign(officeId=${office.id})}"
-					          method="post"
-					          style="display:inline;">
-					        <button type="submit">Unassign</button>
-					    </form>
-
-					    <form th:if="${office.user == null and office.status.name() == 'AVAILABLE'}"
-					          th:action="@{/admin/offices/{officeId}/maintenance(officeId=${office.id})}"
-					          method="post"
-					          style="display:inline; margin-left: 8px;">
-					        <button type="submit">Mark Maintenance</button>
-					    </form>
-
-					    <form th:if="${office.user == null and office.status.name() == 'MAINTENANCE'}"
-					          th:action="@{/admin/offices/{officeId}/available(officeId=${office.id})}"
-					          method="post"
-					          style="display:inline; margin-left: 8px;">
-					        <button type="submit">Mark Available</button>
-					    </form>
-
-					    <span th:if="${office.user == null and office.status.name() == 'OCCUPIED'}">—</span>
-					</td>
-                   
-                </tr>
-            </tbody>
-        </table>
-    </div>
-	<div class="section">
-	    <h2>Maintenance Offices</h2>
-	    <table>
-	        <thead>
-	            <tr>
-	                <th>Office Number</th>
-	                <th>Square Feet</th>
-	                <th>Monthly Rent</th>
-	                <th>Description</th>
-	                <th>Status</th>
-	            </tr>
-	        </thead>
-	        <tbody>
-	            <tr th:if="${#lists.isEmpty(maintenanceOffices)}">
-	                <td colspan="5">No offices are currently in maintenance.</td>
-	            </tr>
-	            <tr th:each="office : ${maintenanceOffices}">
-	                <td th:text="${office.officeNumber}">1</td>
-	                <td th:text="${office.squareFeet}">500</td>
-	                <td th:text="${office.monthlyRent}">$0.00</td>
-	                <td th:text="${office.description != null && !#strings.isEmpty(office.description) ? office.description : 'No description'}">
-	                    No description
-	                </td>
-	                <td th:text="${office.status}">MAINTENANCE</td>
-	            </tr>
-	        </tbody>
-	    </table>
-	</div>
-    <div class="section">
-        <h2>Tenants</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Role</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr th:each="tenant : ${tenants}">
-                    <td th:text="${tenant.firstName + ' ' + tenant.lastName}">Tenant Name</td>
-                    <td th:text="${tenant.email}">tenant@email.com</td>
-                    <td th:text="${tenant.role}">TENANT</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-</body>
 </html>

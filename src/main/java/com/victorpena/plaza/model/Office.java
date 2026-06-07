@@ -100,7 +100,5 @@ public class Office {
 
 	public void setUser(User user) {
 	    this.user = user;
-	}
-	
-	
+	}	
 }

@@ -11,4 +11,5 @@ public interface LeaseRepository
 
     List<Lease> findByActiveTrue();
 
+    List<Lease> findByTenantId(Long tenantId);
 }

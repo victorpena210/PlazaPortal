@@ -1,21 +1,18 @@
 package com.victorpena.plaza.controller;
 
-import java.time.LocalDateTime;
-import java.util.Optional;
-
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.victorpena.plaza.model.Role;
 import com.victorpena.plaza.model.TenantInvitation;
-import com.victorpena.plaza.repository.TenantInvitationRepository;
+import com.victorpena.plaza.service.InvitationService;
 import com.victorpena.plaza.service.UserService;
 import com.victorpena.plaza.web.RegistrationForm;
 
@@ -26,11 +23,14 @@ import jakarta.validation.Valid;
 public class RegistrationController {
 
     private final UserService userService;
-    private final TenantInvitationRepository invitationRepository;
+    private final InvitationService invitationService;
 
-    public RegistrationController(UserService userService, TenantInvitationRepository invitationRepository) {
+    public RegistrationController(
+            UserService userService,
+            InvitationService invitationService) {
+
         this.userService = userService;
-        this.invitationRepository = invitationRepository;
+        this.invitationService = invitationService;
     }
 
     @GetMapping
@@ -38,20 +38,10 @@ public class RegistrationController {
             @RequestParam String token,
             Model model) {
 
-        Optional<TenantInvitation> invitation =
-                invitationRepository.findByToken(token);
+        TenantInvitation invitation =
+                invitationService.getValidInvitation(token);
 
-        if (invitation.isEmpty()) {
-            return "invalid-invite";
-        }
-
-        if (invitation.get().isUsed()) {
-            return "invalid-invite";
-        }
-
-        if (invitation.get().getExpiresAt()
-                .isBefore(LocalDateTime.now())) {
-
+        if (invitation == null) {
             return "invalid-invite";
         }
 
@@ -70,30 +60,22 @@ public class RegistrationController {
             RedirectAttributes redirectAttributes) {
 
         if (!form.getPassword().equals(form.getConfirmPassword())) {
+
             bindingResult.rejectValue(
                     "confirmPassword",
                     "password.mismatch",
                     "Passwords do not match.");
         }
 
-        Optional<TenantInvitation> invitation =
-                invitationRepository.findByToken(form.getToken());
+        TenantInvitation invite =
+                invitationService.getValidInvitation(form.getToken());
 
-        if (invitation.isEmpty()) {
-            return "invalid-invite";
-        }
-
-        TenantInvitation invite = invitation.get();
-
-        if (invite.isUsed()) {
-            return "invalid-invite";
-        }
-
-        if (invite.getExpiresAt().isBefore(LocalDateTime.now())) {
+        if (invite == null) {
             return "invalid-invite";
         }
 
         if (userService.emailExists(invite.getEmail())) {
+
             bindingResult.rejectValue(
                     "email",
                     "email.exists",
@@ -112,8 +94,7 @@ public class RegistrationController {
                 Role.TENANT
         );
 
-        invite.setUsed(true);
-        invitationRepository.save(invite);
+        invitationService.markUsed(invite);
 
         redirectAttributes.addFlashAttribute(
                 "successMessage",

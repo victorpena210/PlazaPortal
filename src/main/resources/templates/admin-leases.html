@@ -16,8 +16,8 @@
 
 	    <tr th:each="lease : ${leases}">
 	        <td th:text="${lease.id}"></td>
-	        <td th:text="${lease.tenant.fullName}"></td>
-	        <td th:text="${lease.startDate}"></td>
+			<td th:text="${lease.tenant.firstName + ' ' + lease.tenant.lastName}"></td>	        
+			<td th:text="${lease.startDate}"></td>
 	        <td th:text="${lease.endDate}"></td>
 	    </tr>
 	</table>
