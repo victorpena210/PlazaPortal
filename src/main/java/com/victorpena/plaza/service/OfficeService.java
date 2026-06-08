@@ -29,9 +29,8 @@ public class OfficeService {
 		return officeRepository.findByStatus(OfficeStatus.OCCUPIED);
 	}
 	
-	public List<Office> findByUserId(Long userId) {
-		return officeRepository.findByUserId(userId);
-	}
+
+	
 	
 	public List<Office> findMaintenanceOffices() {
 	    return officeRepository.findByStatus(OfficeStatus.MAINTENANCE);

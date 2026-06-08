@@ -6,14 +6,12 @@ import com.victorpena.plaza.model.Invoice;
 import com.victorpena.plaza.model.Office;
 import com.victorpena.plaza.model.User;
 import com.victorpena.plaza.repository.InvoiceRepository;
+import com.victorpena.plaza.service.LeaseService;
 import com.victorpena.plaza.service.MaintenanceRequestService;
-import com.victorpena.plaza.service.OfficeService;
 import com.victorpena.plaza.service.PaymentService;
 import com.victorpena.plaza.service.UserService;
 
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,20 +21,21 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+
 @Controller
 @RequestMapping("/tenant")
 public class TenantController {
 
     private final UserService userService;
-    private final OfficeService officeService;
+    private final LeaseService leaseService;    
     private final MaintenanceRequestService maintenanceRequestService;
     private final PaymentService paymentService;
     private final InvoiceRepository invoiceRepository;
     
 
-    public TenantController(UserService userService, OfficeService officeService, MaintenanceRequestService maintenanceRequestService, PaymentService paymentService, InvoiceRepository invoiceRepository) {
+    public TenantController(UserService userService, LeaseService leaseService, MaintenanceRequestService maintenanceRequestService, PaymentService paymentService, InvoiceRepository invoiceRepository) {
         this.userService = userService;
-        this.officeService = officeService;
+        this.leaseService = leaseService;
         this.maintenanceRequestService = maintenanceRequestService;
         this.paymentService = paymentService;
         this.invoiceRepository = invoiceRepository;
@@ -49,7 +48,7 @@ public class TenantController {
         User user = userService.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("User not found: " + email));
 
-        List<Office> offices = officeService.findByUserId(user.getId());
+        List<Office> offices = leaseService.findOfficesByTenantId(user.getId());
 
         model.addAttribute("requests", maintenanceRequestService.findByUserId(user.getId()));
         model.addAttribute("user", user);
@@ -67,7 +66,7 @@ public class TenantController {
                 .orElseThrow(() -> new IllegalArgumentException("User not found: " + email));
 
         model.addAttribute("user", user);
-        model.addAttribute("offices", officeService.findByUserId(user.getId()));
+        model.addAttribute("offices", leaseService.findOfficesByTenantId(user.getId()));
 
         return "tenant-maintenance-form";
     }
@@ -102,7 +101,7 @@ public class TenantController {
     			.orElseThrow(() -> new IllegalArgumentException("User not found: " + email));
     	
     	model.addAttribute("user", user);
-    	model.addAttribute("offices", officeService.findByUserId(user.getId()));
+    	model.addAttribute("offices", leaseService.findOfficesByTenantId(user.getId()));
     	model.addAttribute("payments", paymentService.findByUserId(user.getId()));
     	
     	return "tenant-payment-form";
@@ -119,7 +118,7 @@ public class TenantController {
                 .orElseThrow(() ->
                         new IllegalArgumentException("User not found"));
 
-        List<Office> offices = officeService.findByUserId(user.getId());
+        List<Office> offices = leaseService.findOfficesByTenantId(user.getId());
 
         model.addAttribute(
                 "payments",

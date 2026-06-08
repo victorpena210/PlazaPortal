@@ -37,9 +37,15 @@ public class MaintenanceRequest {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
+    @ManyToOne
+    @JoinColumn(name = "lease_id")
+    private Lease lease;
+    
+    
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+    
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "office_id", nullable = false)
@@ -180,4 +186,20 @@ public class MaintenanceRequest {
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
     }
+
+	public Lease getLease() {
+		return lease;
+	}
+
+	public void setLease(Lease lease) {
+		this.lease = lease;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public void setCreatedAt(LocalDateTime createdAt) {
+		this.createdAt = createdAt;
+	}
 }

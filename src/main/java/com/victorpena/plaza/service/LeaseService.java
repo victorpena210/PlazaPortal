@@ -1,6 +1,7 @@
 package com.victorpena.plaza.service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.springframework.stereotype.Service;
 
@@ -71,5 +72,12 @@ public class LeaseService {
         invoiceRepository.save(invoice);
 
         return lease;
+    }
+    
+    public List<Office> findOfficesByTenantId(Long tenantId) {
+        return leaseRepository.findByTenantId(tenantId)
+                .stream()
+                .map(Lease::getOffice)
+                .toList();
     }
 }

@@ -262,11 +262,12 @@ public class AdminController {
 
         } catch (Exception e) {
 
+        	e.printStackTrace();
+
             redirectAttributes.addFlashAttribute(
                     "errorMessage",
-                    "Unable to send email.");
+                    "Unable to send email: " + e.getMessage());
         }
-
         return "redirect:/admin/tenants";
     }
     
