@@ -20,15 +20,17 @@ public class LeaseService {
     private final LeaseRepository leaseRepository;
     private final OfficeRepository officeRepository;
     private final InvoiceRepository invoiceRepository;
+    private final InvitationService invitationService;
 
     public LeaseService(
             LeaseRepository leaseRepository,
             OfficeRepository officeRepository,
-            InvoiceRepository invoiceRepository) {
+            InvoiceRepository invoiceRepository, InvitationService invitationService) {
 
         this.leaseRepository = leaseRepository;
         this.officeRepository = officeRepository;
         this.invoiceRepository = invoiceRepository;
+        this.invitationService = invitationService;
     }
 
     public Lease createLease(LeaseForm form) {
@@ -53,7 +55,15 @@ public class LeaseService {
         lease = leaseRepository.save(lease);
 
         Invoice invoice = new Invoice();
+        
+        if (lease.getTenantEmail() != null
+                && !lease.getTenantEmail().isBlank()) {
 
+            invitationService.sendInvitation(
+                    lease.getTenantEmail(),
+                    lease);
+        }
+        
         invoice.setLease(lease);
         invoice.setAmount(lease.getMonthlyRent());
 

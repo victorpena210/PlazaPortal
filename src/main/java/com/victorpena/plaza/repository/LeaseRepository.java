@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-
+import org.springframework.data.jpa.repository.Query;
 import com.victorpena.plaza.model.Lease;
 
 public interface LeaseRepository extends JpaRepository<Lease, Long> {
@@ -17,5 +17,6 @@ public interface LeaseRepository extends JpaRepository<Lease, Long> {
             Long userId,
             Long officeId);
 
+    @Query("SELECT l FROM Lease l WHERE l.tenantEmail = :tenantEmail")
     Optional<Lease> findByTenantEmail(String tenantEmail);
 }
