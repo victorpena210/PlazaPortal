@@ -6,6 +6,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
@@ -17,8 +18,15 @@ public class Lease {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-    @ManyToOne
-    private User tenant;
+	// portal account (nullable until registration)
+	@ManyToOne
+	@JoinColumn(name = "tenant_id")
+	private User portalAccess;
+    
+    private String tenantName;
+    
+    private String tenantEmail;
+    
 
     @ManyToOne
     private Office office;
@@ -38,15 +46,6 @@ public class Lease {
 	public void setId(Long id) {
 		this.id = id;
 	}
-
-	public User getTenant() {
-		return tenant;
-	}
-
-	public void setTenant(User tenant) {
-		this.tenant = tenant;
-	}
-
 
 
 	public void setOffice(Office office) {
@@ -89,6 +88,30 @@ public class Lease {
 
 	public void setActive(boolean active) {
 		this.active = active;
+	}
+
+	public User getPortalAccess() {
+		return portalAccess;
+	}
+
+	public void setPortalAccess(User portalAccess) {
+		this.portalAccess = portalAccess;
+	}
+
+	public String getTenantName() {
+		return tenantName;
+	}
+
+	public void setTenantName(String tenantName) {
+		this.tenantName = tenantName;
+	}
+
+	public String getTenantEmail() {
+		return tenantEmail;
+	}
+
+	public void setTenantEmail(String tenantEmail) {
+		this.tenantEmail = tenantEmail;
 	}
 
 

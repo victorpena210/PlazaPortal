@@ -9,38 +9,31 @@ import com.victorpena.plaza.model.Invoice;
 import com.victorpena.plaza.model.InvoiceStatus;
 import com.victorpena.plaza.model.Lease;
 import com.victorpena.plaza.model.Office;
-import com.victorpena.plaza.model.User;
 import com.victorpena.plaza.repository.InvoiceRepository;
 import com.victorpena.plaza.repository.LeaseRepository;
 import com.victorpena.plaza.repository.OfficeRepository;
-import com.victorpena.plaza.repository.UserRepository;
 import com.victorpena.plaza.web.LeaseForm;
 
 @Service
 public class LeaseService {
 
     private final LeaseRepository leaseRepository;
-    private final UserRepository userRepository;
     private final OfficeRepository officeRepository;
     private final InvoiceRepository invoiceRepository;
 
     public LeaseService(
             LeaseRepository leaseRepository,
-            UserRepository userRepository,
             OfficeRepository officeRepository,
             InvoiceRepository invoiceRepository) {
 
         this.leaseRepository = leaseRepository;
-        this.userRepository = userRepository;
         this.officeRepository = officeRepository;
         this.invoiceRepository = invoiceRepository;
     }
 
     public Lease createLease(LeaseForm form) {
 
-        User tenant =
-                userRepository.findById(form.getTenantId())
-                        .orElseThrow();
+
 
         Office office =
                 officeRepository.findById(form.getOfficeId())
@@ -48,7 +41,9 @@ public class LeaseService {
 
         Lease lease = new Lease();
 
-        lease.setTenant(tenant);
+        lease.setTenantName(form.getTenantName());
+        lease.setTenantEmail(form.getTenantEmail());
+        lease.setPortalAccess(null);
         lease.setOffice(office);
         lease.setMonthlyRent(form.getMonthlyRent());
         lease.setStartDate(form.getStartDate());
@@ -75,7 +70,7 @@ public class LeaseService {
     }
     
     public List<Office> findOfficesByTenantId(Long tenantId) {
-        return leaseRepository.findByTenantId(tenantId)
+        return leaseRepository.findByPortalAccess_Id(tenantId)
                 .stream()
                 .map(Lease::getOffice)
                 .toList();

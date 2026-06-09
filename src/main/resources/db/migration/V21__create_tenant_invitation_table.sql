@@ -2,6 +2,6 @@ CREATE TABLE tenant_invitation (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     email VARCHAR(255) NOT NULL,
     token VARCHAR(255) NOT NULL,
-    expries_at DATETIME NOT NULL,
+    expires_at DATETIME NOT NULL,
     used BOOLEAN NOT NULL DEFAULT FALSE
 );

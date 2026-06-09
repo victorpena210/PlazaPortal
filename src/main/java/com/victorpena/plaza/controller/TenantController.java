@@ -142,7 +142,7 @@ public class TenantController {
 
         model.addAttribute(
                 "invoices",
-                invoiceRepository.findByLeaseTenant(user)
+                invoiceRepository.findByLeasePortalAccess_Id(null)
         );
 
         return "tenant-invoices";    	

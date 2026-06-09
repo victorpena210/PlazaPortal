@@ -25,14 +25,14 @@ public class MaintenanceRequestService {
 
     public MaintenanceRequest createRequest(Long userId, Long officeId, String title, String description) {
     	Lease lease = leaseRepository
-    	        .findByTenantIdAndOfficeIdAndActiveTrue(userId, officeId)
+    	        .findByPortalAccess_IdAndOffice_IdAndActiveTrue(userId, officeId)
     	        .orElseThrow(() ->
     	                new RuntimeException("Active lease not found"));
 
 
         MaintenanceRequest request = new MaintenanceRequest();
         request.setLease(lease);
-        request.setUser(lease.getTenant());
+        request.setUser(lease.getPortalAccess());
         request.setOffice(lease.getOffice());
         request.setTitle(title.trim());
         request.setDescription(description.trim());

@@ -1,0 +1,5 @@
+ALTER TABLE leases
+ADD COLUMN tenant_name VARCHAR(255);
+
+ALTER TABLE leases
+ADD COLUMN tenant_email VARCHAR(255);

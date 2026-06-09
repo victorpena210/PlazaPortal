@@ -11,20 +11,21 @@
       th:object="${lease}"
       method="post">
 
-    <div>
-        <label>Tenant</label>
+	  <div>
+	      <label>Tenant Name</label>
 
-		<select th:field="*{tenantId}" required>
+	      <input type="text"
+	             th:field="*{tenantName}"
+	             required>
+	  </div>
 
-		    <option value="">Select Tenant</option>
+	  <div>
+	      <label>Tenant Email</label>
 
-		    <option th:each="tenant : ${tenants}"
-		            th:value="${tenant.id}"
-		            th:text="${tenant.firstName + ' ' + tenant.lastName}">
-		    </option>
-
-		</select>
-    </div>
+	      <input type="email"
+	             th:field="*{tenantEmail}"
+	             required>
+	  </div>
 
     <div>
         <label>Office</label>

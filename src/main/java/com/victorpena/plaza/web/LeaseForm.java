@@ -5,7 +5,9 @@ import java.time.LocalDate;
 
 public class LeaseForm {
 	
-	private Long tenantId;
+	private String tenantName;
+
+	private String tenantEmail;
 	
 	private Long officeId;
 	
@@ -15,12 +17,20 @@ public class LeaseForm {
 	
 	private LocalDate endDate;
 
-	public Long getTenantId() {
-		return tenantId;
+	public String getTenantName() {
+		return tenantName;
 	}
 
-	public void setTenantId(Long tenantId) {
-		this.tenantId = tenantId;
+	public void setTenantName(String tenantName) {
+		this.tenantName = tenantName;
+	}
+
+	public String getTenantEmail() {
+		return tenantEmail;
+	}
+
+	public void setTenantEmail(String tenantEmail) {
+		this.tenantEmail = tenantEmail;
 	}
 
 	public Long getOfficeId() {

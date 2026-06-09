@@ -16,7 +16,7 @@ public class TenantInvitation {
 	
 	private String email;
 	private String token;
-	private LocalDateTime expriesAt;
+	private LocalDateTime expiresAt;
 	private boolean used;
 	public Long getId() {
 		return id;
@@ -37,10 +37,10 @@ public class TenantInvitation {
 		this.token = token;
 	}
 	public LocalDateTime getExpiresAt() {
-		return expriesAt;
+		return expiresAt;
 	}
-	public void setExpiresAt(LocalDateTime expriesAt) {
-		this.expriesAt = expriesAt;
+	public void setExpiresAt(LocalDateTime expireAt) {
+		this.expiresAt = expireAt;
 	}
 	public boolean isUsed() {
 		return used;

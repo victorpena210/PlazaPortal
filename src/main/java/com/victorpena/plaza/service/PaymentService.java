@@ -65,7 +65,7 @@ public class PaymentService {
         Payment payment = new Payment();
 
         payment.setInvoice(invoice);
-        payment.setUser(invoice.getLease().getTenant());
+        payment.setUser(invoice.getLease().getPortalAccess());
         payment.setOffice(invoice.getLease().getOffice());
         payment.setAmount(invoice.getAmount());
         payment.setTotalAmount(invoice.getAmount());
