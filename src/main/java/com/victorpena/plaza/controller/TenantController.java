@@ -157,4 +157,21 @@ public class TenantController {
     	return "payment-checkout";
     }
     
+    @GetMapping("/lease")
+    public String viewLease(
+            Authentication authentication,
+            Model model) {
+
+        User user = userService
+                .findByEmail(authentication.getName())
+                .orElseThrow();
+
+        model.addAttribute(
+                "leases",
+                leaseService.findLeasesByTenantId(user.getId())
+        );
+
+        return "tenant-lease";
+    }
+    
 }

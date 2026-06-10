@@ -112,52 +112,6 @@ public class InvitationService {
         mailSender.send(message);
     }
     
-    public void sendInvitation(String email) {
-
-        if (userRepository.existsByEmail(email)) {
-            throw new IllegalArgumentException(
-                    "A user with this email already exists.");
-        }
-
-        Optional<TenantInvitation> existingInvite =
-                invitationRepository.findByEmailAndUsedFalse(email);
-
-        if (existingInvite.isPresent()
-                && existingInvite.get()
-                        .getExpiresAt()
-                        .isAfter(LocalDateTime.now())) {
-
-            throw new IllegalArgumentException(
-                    "An active invitation has already been sent to this email.");
-        }
-
-        TenantInvitation invitation = new TenantInvitation();
-
-        invitation.setEmail(email);
-        invitation.setToken(UUID.randomUUID().toString());
-        invitation.setExpiresAt(LocalDateTime.now().plusDays(7));
-        invitation.setUsed(false);
-
-        invitationRepository.save(invitation);
-
-        String registrationLink =
-                "http://localhost:8080/register?token="
-                        + invitation.getToken();
-
-        SimpleMailMessage message =
-                new SimpleMailMessage();
-
-        message.setFrom("13victor.pena@gmail.com");
-        message.setTo(email);
-
-        message.setSubject(
-                "Peña Plaza Tenant Registration");
-
-        message.setText(
-                "You have been invited to register for Peña Plaza.\n\n"
-                        + "Click the link below to create your account:\n\n"
-                        + registrationLink);
-
-        mailSender.send(message);
-    }
+  
+    
 }

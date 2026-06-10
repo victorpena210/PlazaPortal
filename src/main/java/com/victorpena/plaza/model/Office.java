@@ -25,8 +25,6 @@ public class Office {
 	@Column(name = "square_feet")
 	private Integer squareFeet;
 	
-	@Column(name = "monthly_rent", nullable = false, precision = 10, scale = 2)
-	private BigDecimal monthlyRent;
 	
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
@@ -64,13 +62,6 @@ public class Office {
 		this.squareFeet = squareFeet;
 	}
 
-	public BigDecimal getMonthlyRent() {
-		return monthlyRent;
-	}
-
-	public void setMonthlyRent(BigDecimal monthlyRent) {
-		this.monthlyRent = monthlyRent;
-	}
 
 	public OfficeStatus getStatus() {
 		return status;

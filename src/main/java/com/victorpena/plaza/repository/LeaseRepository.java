@@ -19,4 +19,9 @@ public interface LeaseRepository extends JpaRepository<Lease, Long> {
 
     @Query("SELECT l FROM Lease l WHERE l.tenantEmail = :tenantEmail")
     Optional<Lease> findByTenantEmail(String tenantEmail);
+    
+    List<Lease> findByPortalAccess_IdAndActiveTrue(Long userId);
+    
+
+
 }

@@ -10,8 +10,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.victorpena.plaza.model.Lease;
 import com.victorpena.plaza.model.Role;
 import com.victorpena.plaza.model.TenantInvitation;
+import com.victorpena.plaza.model.User;
+import com.victorpena.plaza.repository.LeaseRepository;
 import com.victorpena.plaza.service.InvitationService;
 import com.victorpena.plaza.service.UserService;
 import com.victorpena.plaza.web.RegistrationForm;
@@ -24,13 +27,15 @@ public class RegistrationController {
 
     private final UserService userService;
     private final InvitationService invitationService;
-
+    private final LeaseRepository leaseRepository;
+    
     public RegistrationController(
             UserService userService,
-            InvitationService invitationService) {
+            InvitationService invitationService, LeaseRepository leaseRepository) {
 
         this.userService = userService;
         this.invitationService = invitationService;
+        this.leaseRepository = leaseRepository;
     }
 
     @GetMapping
@@ -86,13 +91,18 @@ public class RegistrationController {
             return "register";
         }
 
-        userService.registerUser(
+        User user = userService.registerUser(
                 form.getFirstName(),
                 form.getLastName(),
                 invite.getEmail(),
                 form.getPassword(),
                 Role.TENANT
         );
+        
+        Lease lease = invite.getLease();
+        lease.setPortalAccess(user);
+        leaseRepository.save(lease);
+        
 
         invitationService.markUsed(invite);
 

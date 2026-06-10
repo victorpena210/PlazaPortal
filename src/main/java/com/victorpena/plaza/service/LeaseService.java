@@ -85,4 +85,8 @@ public class LeaseService {
                 .map(Lease::getOffice)
                 .toList();
     }
+    
+    public List<Lease> findLeasesByTenantId(Long tenantId) {
+        return leaseRepository.findByPortalAccess_IdAndActiveTrue(tenantId);
+    }
 }

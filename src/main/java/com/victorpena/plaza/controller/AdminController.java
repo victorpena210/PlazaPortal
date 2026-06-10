@@ -2,7 +2,6 @@ package com.victorpena.plaza.controller;
 
 import com.victorpena.plaza.model.MaintenanceRequestStatus;
 import com.victorpena.plaza.repository.LeaseRepository;
-import com.victorpena.plaza.service.InvitationService;
 import com.victorpena.plaza.service.MaintenanceRequestService;
 import com.victorpena.plaza.service.OfficeService;
 import com.victorpena.plaza.service.PaymentService;
@@ -26,22 +25,19 @@ public class AdminController {
     private final MaintenanceRequestService maintenanceRequestService;
     private final PaymentService paymentService;
     private final LeaseRepository leaseRepository;
-    private final InvitationService invitationService;
 
     public AdminController(
             OfficeService officeService,
             UserService userService,
             MaintenanceRequestService maintenanceRequestService,
             PaymentService paymentService,
-            LeaseRepository leaseRepository,
-            InvitationService invitationService) {
+            LeaseRepository leaseRepository) {
 
         this.officeService = officeService;
         this.userService = userService;
         this.maintenanceRequestService = maintenanceRequestService;
         this.paymentService = paymentService;
         this.leaseRepository = leaseRepository;
-        this.invitationService = invitationService;
     }
 
     /*
@@ -241,36 +237,7 @@ public class AdminController {
      * =========================================
      */
     
-    @PostMapping("/invite")
-    public String inviteTenant(
-            @RequestParam String email,
-            RedirectAttributes redirectAttributes) {
-
-        try {
-
-            invitationService.sendInvitation(email);
-
-            redirectAttributes.addFlashAttribute(
-                    "successMessage",
-                    "Invitation email sent to " + email);
-
-        } catch (IllegalArgumentException e) {
-
-            redirectAttributes.addFlashAttribute(
-                    "errorMessage",
-                    e.getMessage());
-
-        } catch (Exception e) {
-
-        	e.printStackTrace();
-
-            redirectAttributes.addFlashAttribute(
-                    "errorMessage",
-                    "Unable to send email: " + e.getMessage());
-        }
-        return "redirect:/admin/tenants";
-    }
-    
+   
     @GetMapping("/tenants")
     public String manageTenants(Model model) {
 

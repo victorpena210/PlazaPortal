@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Lease Details</title>
+</head>
+<body>
+
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<h1>Your Lease Details</h1>
+
+<div th:if="${#lists.isEmpty(leases)}">
+    <p>No active lease found.</p>
+</div>
+
+<table th:if="${!#lists.isEmpty(leases)}"
+       border="1"
+       cellpadding="8">
+
+    <thead>
+        <tr>
+            <th>Office</th>
+            <th>Tenant</th>
+            <th>Monthly Rent</th>
+            <th>Start Date</th>
+            <th>End Date</th>
+            <th>Active</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <tr th:each="lease : ${leases}">
+            <td th:text="${lease.office.officeNumber}"></td>
+            <td th:text="${lease.tenantName}"></td>
+            <td th:text="${lease.monthlyRent}"></td>
+            <td th:text="${lease.startDate}"></td>
+            <td th:text="${lease.endDate}"></td>
+            <td th:text="${lease.active}"></td>
+        </tr>
+    </tbody>
+
+</table>
+
+</body>
+</html>
