@@ -59,9 +59,7 @@ public class LeaseService {
         if (lease.getTenantEmail() != null
                 && !lease.getTenantEmail().isBlank()) {
 
-            invitationService.sendInvitation(
-                    lease.getTenantEmail(),
-                    lease);
+            invitationService.sendInvitation(lease);
         }
         
         invoice.setLease(lease);

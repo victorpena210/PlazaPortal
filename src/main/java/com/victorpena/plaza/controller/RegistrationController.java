@@ -79,7 +79,9 @@ public class RegistrationController {
             return "invalid-invite";
         }
 
-        if (userService.emailExists(invite.getEmail())) {
+        Lease lease = invite.getLease();
+
+        if (userService.emailExists(lease.getTenantEmail())) {
 
             bindingResult.rejectValue(
                     "email",
@@ -94,12 +96,11 @@ public class RegistrationController {
         User user = userService.registerUser(
                 form.getFirstName(),
                 form.getLastName(),
-                invite.getEmail(),
+                lease.getTenantEmail(),
                 form.getPassword(),
                 Role.TENANT
         );
         
-        Lease lease = invite.getLease();
         lease.setPortalAccess(user);
         leaseRepository.save(lease);
         

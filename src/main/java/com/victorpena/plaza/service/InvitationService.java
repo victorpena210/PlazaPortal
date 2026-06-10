@@ -19,10 +19,8 @@ public class InvitationService {
     private final TenantInvitationRepository invitationRepository;
     private final UserRepository userRepository;
     private final JavaMailSender mailSender;
-    
 
     public InvitationService(
-    		
             TenantInvitationRepository invitationRepository,
             UserRepository userRepository,
             JavaMailSender mailSender) {
@@ -58,11 +56,17 @@ public class InvitationService {
     public void markUsed(TenantInvitation invitation) {
 
         invitation.setUsed(true);
-
         invitationRepository.save(invitation);
     }
 
-    public void sendInvitation(String email, Lease lease) {
+    public void sendInvitation(Lease lease) {
+
+        String email = lease.getTenantEmail();
+
+        if (email == null || email.isBlank()) {
+            throw new IllegalArgumentException(
+                    "Lease must have a tenant email.");
+        }
 
         if (userRepository.existsByEmail(email)) {
             throw new IllegalArgumentException(
@@ -70,7 +74,8 @@ public class InvitationService {
         }
 
         Optional<TenantInvitation> existingInvite =
-                invitationRepository.findByEmailAndUsedFalse(email);
+                invitationRepository.findByLeaseIdAndUsedFalse(
+                        lease.getId());
 
         if (existingInvite.isPresent()
                 && existingInvite.get()
@@ -78,15 +83,15 @@ public class InvitationService {
                         .isAfter(LocalDateTime.now())) {
 
             throw new IllegalArgumentException(
-                    "An active invitation has already been sent to this email.");
+                    "An active invitation already exists for this lease.");
         }
 
         TenantInvitation invitation = new TenantInvitation();
 
-        invitation.setEmail(email);
         invitation.setLease(lease);
         invitation.setToken(UUID.randomUUID().toString());
-        invitation.setExpiresAt(LocalDateTime.now().plusDays(7));
+        invitation.setExpiresAt(
+                LocalDateTime.now().plusDays(7));
         invitation.setUsed(false);
 
         invitationRepository.save(invitation);
@@ -111,7 +116,4 @@ public class InvitationService {
 
         mailSender.send(message);
     }
-    
-  
-    
 }

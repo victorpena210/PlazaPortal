@@ -12,6 +12,6 @@ public interface TenantInvitationRepository extends JpaRepository<TenantInvitati
 
 	Optional<TenantInvitation> findByToken(String token);
 	
-	Optional<TenantInvitation> findByEmailAndUsedFalse(String email);
-
+	Optional<TenantInvitation>
+	findByLeaseIdAndUsedFalse(Long leaseId);
 }

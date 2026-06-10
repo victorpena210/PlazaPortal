@@ -17,7 +17,6 @@ public class TenantInvitation {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	
-	private String email;
 	private String token;
 	private LocalDateTime expiresAt;
 	private boolean used;
@@ -34,12 +33,7 @@ public class TenantInvitation {
 	public void setId(Long id) {
 		this.id = id;
 	}
-	public String getEmail() {
-		return email;
-	}
-	public void setEmail(String email) {
-		this.email = email;
-	}
+
 	
 	public Lease getLease() {
 		return lease;
