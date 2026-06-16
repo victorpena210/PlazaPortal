@@ -2,6 +2,7 @@ package com.victorpena.plaza.controller;
 
 import com.victorpena.plaza.model.MaintenanceRequestStatus;
 import com.victorpena.plaza.repository.LeaseRepository;
+import com.victorpena.plaza.service.LeaseService;
 import com.victorpena.plaza.service.MaintenanceRequestService;
 import com.victorpena.plaza.service.OfficeService;
 import com.victorpena.plaza.service.PaymentService;
@@ -24,20 +25,21 @@ public class AdminController {
     private final UserService userService;
     private final MaintenanceRequestService maintenanceRequestService;
     private final PaymentService paymentService;
-    private final LeaseRepository leaseRepository;
+    private final LeaseService leaseService;
 
     public AdminController(
             OfficeService officeService,
             UserService userService,
             MaintenanceRequestService maintenanceRequestService,
             PaymentService paymentService,
-            LeaseRepository leaseRepository) {
+            LeaseService leaseService
+            ) {
 
         this.officeService = officeService;
         this.userService = userService;
         this.maintenanceRequestService = maintenanceRequestService;
         this.paymentService = paymentService;
-        this.leaseRepository = leaseRepository;
+        this.leaseService = leaseService;
     }
 
     /*
@@ -202,7 +204,7 @@ public class AdminController {
     @GetMapping("/leases")
     public String leases(Model model) {
     	
-    	model.addAttribute("leases", leaseRepository.findAll());
+    	model.addAttribute("leases", leaseService.findAll());
     	
     	model.addAttribute("activePage", "leases");
     	

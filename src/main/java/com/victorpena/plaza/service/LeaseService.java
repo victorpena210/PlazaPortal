@@ -1,15 +1,11 @@
 package com.victorpena.plaza.service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.victorpena.plaza.model.Invoice;
-import com.victorpena.plaza.model.InvoiceStatus;
 import com.victorpena.plaza.model.Lease;
 import com.victorpena.plaza.model.Office;
-import com.victorpena.plaza.repository.InvoiceRepository;
 import com.victorpena.plaza.repository.LeaseRepository;
 import com.victorpena.plaza.repository.OfficeRepository;
 import com.victorpena.plaza.web.LeaseForm;
@@ -19,24 +15,22 @@ public class LeaseService {
 
     private final LeaseRepository leaseRepository;
     private final OfficeRepository officeRepository;
-    private final InvoiceRepository invoiceRepository;
+    private final InvoiceService invoiceService;
     private final InvitationService invitationService;
 
     public LeaseService(
             LeaseRepository leaseRepository,
             OfficeRepository officeRepository,
-            InvoiceRepository invoiceRepository, InvitationService invitationService) {
+            InvoiceService invoiceService,
+            InvitationService invitationService) {
 
         this.leaseRepository = leaseRepository;
         this.officeRepository = officeRepository;
-        this.invoiceRepository = invoiceRepository;
+        this.invoiceService = invoiceService;
         this.invitationService = invitationService;
     }
 
     public Lease createLease(LeaseForm form) {
-
-
-
         Office office =
                 officeRepository.findById(form.getOfficeId())
                         .orElseThrow();
@@ -53,27 +47,15 @@ public class LeaseService {
         lease.setActive(true);
 
         lease = leaseRepository.save(lease);
-
-        Invoice invoice = new Invoice();
         
+        invoiceService.createInitialInvoice(lease);
+
         if (lease.getTenantEmail() != null
                 && !lease.getTenantEmail().isBlank()) {
 
             invitationService.sendInvitation(lease);
         }
-        
-        invoice.setLease(lease);
-        invoice.setAmount(lease.getMonthlyRent());
-
-        invoice.setDueDate(
-                lease.getStartDate()
-                     .withDayOfMonth(1));
-
-        invoice.setStatus(InvoiceStatus.PENDING);
-        invoice.setCreatedAt(LocalDateTime.now());
-
-        invoiceRepository.save(invoice);
-
+      
         return lease;
     }
     
@@ -95,6 +77,10 @@ public class LeaseService {
                 .stream()
                 .findFirst()
                 .orElse(null);
+    }
+
+    public List<Lease> findAll() {
+        return leaseRepository.findAll();
     }
 
 }

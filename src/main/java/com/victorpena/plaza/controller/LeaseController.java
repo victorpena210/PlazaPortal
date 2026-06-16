@@ -7,33 +7,29 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import com.victorpena.plaza.repository.LeaseRepository;
-import com.victorpena.plaza.repository.OfficeRepository;
 import com.victorpena.plaza.service.LeaseService;
+import com.victorpena.plaza.service.OfficeService;
 import com.victorpena.plaza.web.LeaseForm;
 
 @Controller
 @RequestMapping("/admin/lease")
 public class LeaseController {
 
-    private final LeaseRepository leaseRepository;
-    private final OfficeRepository officeRepository;
     private final LeaseService leaseService;
+    private final OfficeService officeService;
 
     public LeaseController(
-            LeaseRepository leaseRepository,
-            OfficeRepository officeRepository,
+    		OfficeService officeService,
             LeaseService leaseService) {
 
-        this.leaseRepository = leaseRepository;
-        this.officeRepository = officeRepository;
+        this.officeService = officeService;
         this.leaseService = leaseService;
     }
 
     @GetMapping
     public String listLeases(Model model) {
 
-        model.addAttribute("leases", leaseRepository.findAll());
+        model.addAttribute("leases", leaseService.findAll());
 
         return "admin-leases";
     }
@@ -42,7 +38,7 @@ public class LeaseController {
     public String newLease(Model model) {
 
         model.addAttribute("lease", new LeaseForm());
-        model.addAttribute("offices", officeRepository.findAll());
+        model.addAttribute("offices", officeService.findAll());
 
         return "lease-form";
     }

@@ -6,14 +6,13 @@ import com.victorpena.plaza.model.Invoice;
 import com.victorpena.plaza.model.Lease;
 import com.victorpena.plaza.model.Office;
 import com.victorpena.plaza.model.User;
-import com.victorpena.plaza.repository.InvoiceRepository;
+import com.victorpena.plaza.service.InvoiceService;
 import com.victorpena.plaza.service.LeaseService;
 import com.victorpena.plaza.service.MaintenanceRequestService;
 import com.victorpena.plaza.service.PaymentService;
 import com.victorpena.plaza.service.UserService;
 
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,15 +31,15 @@ public class TenantController {
     private final LeaseService leaseService;    
     private final MaintenanceRequestService maintenanceRequestService;
     private final PaymentService paymentService;
-    private final InvoiceRepository invoiceRepository;
+    private final InvoiceService invoiceService;
     
 
-    public TenantController(UserService userService, LeaseService leaseService, MaintenanceRequestService maintenanceRequestService, PaymentService paymentService, InvoiceRepository invoiceRepository) {
+    public TenantController(UserService userService, LeaseService leaseService, MaintenanceRequestService maintenanceRequestService, PaymentService paymentService, InvoiceService invoiceService) {
         this.userService = userService;
         this.leaseService = leaseService;
         this.maintenanceRequestService = maintenanceRequestService;
         this.paymentService = paymentService;
-        this.invoiceRepository = invoiceRepository;
+        this.invoiceService = invoiceService;
     }
 
     @GetMapping("/dashboard")
@@ -159,8 +158,8 @@ public class TenantController {
 
         model.addAttribute(
                 "invoices",
-                invoiceRepository.findByLeasePortalAccess_Id(null)
-        );
+                invoiceService.findByTenantId(user.getId()));
+        
 
         return "tenant-invoices";    	
     }
@@ -168,7 +167,10 @@ public class TenantController {
     @GetMapping("/pay/{invoiceId}")
     public String payInvoice(@PathVariable Long invoiceId, Model model) {
     	
-    	Invoice invoice = invoiceRepository.findById(invoiceId).orElseThrow();
+    	Invoice invoice =
+    	        invoiceService.findById(invoiceId);    	model.addAttribute("invoice", invoice);
+    	
+    	        
     	model.addAttribute("invoice", invoice);
     	
     	return "payment-checkout";
