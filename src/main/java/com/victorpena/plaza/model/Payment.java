@@ -48,10 +48,22 @@ public class Payment {
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
 	@JoinColumn(name = "office_id", nullable = false)
 	private Office office;
+	
+	@ManyToOne(fetch = FetchType.LAZY, optional = false)
+	@JoinColumn(name = "lease_id", nullable = false)
+	private Lease lease;
 
 //	@Column(name = "payment_month", nullable = false, length = 7)
 //	private String paymentMonth;
 	
+	public Lease getLease() {
+		return lease;
+	}
+
+	public void setLease(Lease lease) {
+		this.lease = lease;
+	}
+
 	@Column(name = "payment_method")
 	private String paymentMethod;
 	

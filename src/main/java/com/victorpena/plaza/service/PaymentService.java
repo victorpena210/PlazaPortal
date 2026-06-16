@@ -30,6 +30,11 @@ public class PaymentService {
     public List<Payment> findByUserId(Long userId) {
         return paymentRepository.findByUserIdOrderByCreatedAtDesc(userId);
     }
+    
+    public List<Payment> findByLeaseId(Long leaseId) {
+        return paymentRepository.findByLeaseIdOrderByCreatedAtDesc(leaseId);
+    }
+    
 
     public List<Payment> findAll() {
         return paymentRepository.findAllByOrderByCreatedAtDesc();
@@ -65,6 +70,8 @@ public class PaymentService {
         Payment payment = new Payment();
 
         payment.setInvoice(invoice);
+        payment.setLease(invoice.getLease());
+
         payment.setUser(invoice.getLease().getPortalAccess());
         payment.setOffice(invoice.getLease().getOffice());
         payment.setAmount(invoice.getAmount());

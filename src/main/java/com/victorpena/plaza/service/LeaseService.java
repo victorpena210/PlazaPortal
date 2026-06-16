@@ -87,4 +87,14 @@ public class LeaseService {
     public List<Lease> findLeasesByTenantId(Long tenantId) {
         return leaseRepository.findByPortalAccess_IdAndActiveTrue(tenantId);
     }
+    
+    public Lease findActiveLeaseByTenantId(Long tenantId) {
+
+        return leaseRepository
+                .findByPortalAccess_IdAndActiveTrue(tenantId)
+                .stream()
+                .findFirst()
+                .orElse(null);
+    }
+
 }

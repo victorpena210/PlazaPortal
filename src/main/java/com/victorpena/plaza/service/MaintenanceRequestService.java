@@ -44,6 +44,11 @@ public class MaintenanceRequestService {
     public List<MaintenanceRequest> findByUserId(Long userId) {
         return maintenanceRequestRepository.findByUserId(userId);
     }
+    
+    public List<MaintenanceRequest> findByLeaseId(Long leaseId) {
+        return maintenanceRequestRepository
+                .findByLeaseIdOrderByCreatedAtDesc(leaseId);
+    }
 
     public List<MaintenanceRequest> findAll() {
         return maintenanceRequestRepository.findAllByOrderByCreatedAtDesc();

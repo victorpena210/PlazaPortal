@@ -3,6 +3,7 @@ package com.victorpena.plaza.controller;
 import java.util.List;
 
 import com.victorpena.plaza.model.Invoice;
+import com.victorpena.plaza.model.Lease;
 import com.victorpena.plaza.model.Office;
 import com.victorpena.plaza.model.User;
 import com.victorpena.plaza.repository.InvoiceRepository;
@@ -12,6 +13,7 @@ import com.victorpena.plaza.service.PaymentService;
 import com.victorpena.plaza.service.UserService;
 
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -47,13 +49,28 @@ public class TenantController {
 
         User user = userService.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("User not found: " + email));
+        
+        model.addAttribute("user", user);
+
+        
+        Lease lease = leaseService.findActiveLeaseByTenantId(user.getId());
 
         List<Office> offices = leaseService.findOfficesByTenantId(user.getId());
 
-        model.addAttribute("requests", maintenanceRequestService.findByUserId(user.getId()));
-        model.addAttribute("user", user);
         model.addAttribute("offices", offices);
-        model.addAttribute("payments", paymentService.findByUserId(user.getId()));
+
+        if (lease != null) {
+
+            model.addAttribute(
+                    "maintenanceRequests",
+                    maintenanceRequestService.findByLeaseId(lease.getId())
+            );
+
+            model.addAttribute(
+                    "payments",
+                    paymentService.findByLeaseId(lease.getId())
+            );
+        }
 
         return "tenant-dashboard";
     }

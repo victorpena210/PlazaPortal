@@ -17,6 +17,7 @@ public interface MaintenanceRequestRepository extends JpaRepository<MaintenanceR
 	
     List<MaintenanceRequest> findAllByOrderByCreatedAtDesc();
 
+    List<MaintenanceRequest> findByLeaseIdOrderByCreatedAtDesc(Long leaseId);
 
 		
 
