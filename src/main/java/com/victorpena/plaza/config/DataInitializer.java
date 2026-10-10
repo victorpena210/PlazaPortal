@@ -1,38 +1,44 @@
 package com.victorpena.plaza.config;
 
+import com.victorpena.plaza.model.*;
+import com.victorpena.plaza.repository.*;
+import com.victorpena.plaza.service.*;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.security.crypto.password.PasswordEncoder;
-
-import com.victorpena.plaza.model.Role;
-import com.victorpena.plaza.model.User;
-import com.victorpena.plaza.repository.UserRepository;
+import org.springframework.context.annotation.*;
 
 @Configuration
 public class DataInitializer {
-
-    @Bean
-    CommandLineRunner createAdmin(
-            UserRepository userRepository,
-            PasswordEncoder passwordEncoder) {
-
-        return args -> {
-
-            if (userRepository.count() == 0) {
-
-                User admin = new User();
-                admin.setFirstName("Victor");
-                admin.setLastName("Pena");
-                admin.setEmail("admin@penaplaza.com");
-                admin.setPassword(passwordEncoder.encode("admin123"));
-                admin.setRole(Role.ADMIN);
-                admin.setEnabled(true);
-
-                userRepository.save(admin);
-
-                System.out.println("Admin user created.");
-            }
-        };
-    }
+  @Bean
+  CommandLineRunner bootstrap(
+      UserRepository users,
+      CompanyRepository companies,
+      CompanyMembershipRepository members,
+      UserService service,
+      @Value("${app.bootstrap-email:}") String email,
+      @Value("${app.bootstrap-password:}") String password) {
+    return args -> {
+      if (email.isBlank() || password.isBlank()) return;
+      if (users.existsByEmail(Checks.email(email))) return;
+      var u =
+          service.registerUser(
+              "Company", "Owner", email, password, com.victorpena.plaza.model.Role.ADMIN);
+      var c =
+          companies
+              .findBySlug("pena-plaza")
+              .orElseGet(
+                  () -> {
+                    var n = new Company();
+                    n.setName("Peña Plaza");
+                    n.setSlug("pena-plaza");
+                    n.setSupportEmail(email);
+                    return companies.save(n);
+                  });
+      var m = new CompanyMembership();
+      m.setCompany(c);
+      m.setUser(u);
+      m.setRole(MembershipRole.OWNER);
+      members.save(m);
+    };
+  }
 }

@@ -8,8 +8,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 public class PenaPlazaPortalApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(PenaPlazaPortalApplication.class, args);
-	}
-
+  public static void main(String[] args) {
+    SpringApplication.run(PenaPlazaPortalApplication.class, args);
+  }
 }

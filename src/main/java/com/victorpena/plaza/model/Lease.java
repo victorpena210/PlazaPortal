@@ -1,119 +1,162 @@
 package com.victorpena.plaza.model;
 
+import jakarta.persistence.*;
 import java.math.BigDecimal;
-import java.time.LocalDate;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import java.time.*;
 
 @Entity
 @Table(name = "leases")
 public class Lease {
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "tenant_id")
+  private User portalAccess;
 
-	// portal account (nullable until registration)
-	@ManyToOne
-	@JoinColumn(name = "tenant_id")
-	private User portalAccess;
-    
-    private String tenantName;
-    
-    private String tenantEmail;
-    
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "office_id", nullable = false)
+  private Office office;
 
-    @ManyToOne
-    private Office office;
+  @Column(length = 255)
+  private String tenantName;
 
-    private BigDecimal monthlyRent;
+  @Column(length = 255)
+  private String tenantEmail;
 
-    private LocalDate startDate;
+  @Column(precision = 10, scale = 2)
+  private BigDecimal monthlyRent;
 
-    private LocalDate endDate;
+  private LocalDate startDate;
 
-    private boolean active;
+  private LocalDate endDate;
 
-	public Long getId() {
-		return id;
-	}
+  private boolean active = true;
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+  @Column(nullable = false)
+  private int dueDay = 1;
 
+  @Column(nullable = false)
+  private boolean prorateFirstMonth = false;
 
-	public void setOffice(Office office) {
-		this.office = office;
-	}
-	
-	public Office getOffice() {
-		return office;
-	}
-    
-	
+  @Column(nullable = false)
+  private int graceDays = 0;
 
-	public BigDecimal getMonthlyRent() {
-		return monthlyRent;
-	}
+  @Column(nullable = false, precision = 10, scale = 2)
+  private BigDecimal lateFee = BigDecimal.ZERO;
 
-	public void setMonthlyRent(BigDecimal monthlyRent) {
-		this.monthlyRent = monthlyRent;
-	}
+  public Long getId() {
+    return id;
+  }
 
-	public LocalDate getStartDate() {
-		return startDate;
-	}
+  public void setId(Long value) {
+    this.id = value;
+  }
 
-	public void setStartDate(LocalDate startDate) {
-		this.startDate = startDate;
-	}
+  public User getPortalAccess() {
+    return portalAccess;
+  }
 
-	public LocalDate getEndDate() {
-		return endDate;
-	}
+  public void setPortalAccess(User value) {
+    this.portalAccess = value;
+  }
 
-	public void setEndDate(LocalDate endDate) {
-		this.endDate = endDate;
-	}
+  public Office getOffice() {
+    return office;
+  }
 
-	public boolean isActive() {
-		return active;
-	}
+  public void setOffice(Office value) {
+    this.office = value;
+  }
 
-	public void setActive(boolean active) {
-		this.active = active;
-	}
+  public String getTenantName() {
+    return tenantName;
+  }
 
-	public User getPortalAccess() {
-		return portalAccess;
-	}
+  public void setTenantName(String value) {
+    this.tenantName = value;
+  }
 
-	public void setPortalAccess(User portalAccess) {
-		this.portalAccess = portalAccess;
-	}
+  public String getTenantEmail() {
+    return tenantEmail;
+  }
 
-	public String getTenantName() {
-		return tenantName;
-	}
+  public void setTenantEmail(String value) {
+    this.tenantEmail = value;
+  }
 
-	public void setTenantName(String tenantName) {
-		this.tenantName = tenantName;
-	}
+  public BigDecimal getMonthlyRent() {
+    return monthlyRent;
+  }
 
-	public String getTenantEmail() {
-		return tenantEmail;
-	}
+  public void setMonthlyRent(BigDecimal value) {
+    this.monthlyRent = value;
+  }
 
-	public void setTenantEmail(String tenantEmail) {
-		this.tenantEmail = tenantEmail;
-	}
+  public LocalDate getStartDate() {
+    return startDate;
+  }
 
+  public void setStartDate(LocalDate value) {
+    this.startDate = value;
+  }
 
-	
+  public LocalDate getEndDate() {
+    return endDate;
+  }
+
+  public void setEndDate(LocalDate value) {
+    this.endDate = value;
+  }
+
+  public boolean isActive() {
+    return active;
+  }
+
+  public void setActive(boolean value) {
+    this.active = value;
+  }
+
+  public int getDueDay() {
+    return dueDay;
+  }
+
+  public void setDueDay(int value) {
+    this.dueDay = value;
+  }
+
+  public boolean isProrateFirstMonth() {
+    return prorateFirstMonth;
+  }
+
+  public void setProrateFirstMonth(boolean value) {
+    this.prorateFirstMonth = value;
+  }
+
+  public int getGraceDays() {
+    return graceDays;
+  }
+
+  public void setGraceDays(int value) {
+    this.graceDays = value;
+  }
+
+  public BigDecimal getLateFee() {
+    return lateFee;
+  }
+
+  public void setLateFee(BigDecimal value) {
+    this.lateFee = value;
+  }
+
+  private LocalDate billingStartDate;
+
+  public LocalDate getBillingStartDate() {
+    return billingStartDate;
+  }
+
+  public void setBillingStartDate(LocalDate value) {
+    this.billingStartDate = value;
+  }
 }

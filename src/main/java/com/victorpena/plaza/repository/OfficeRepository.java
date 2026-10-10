@@ -1,17 +1,16 @@
 package com.victorpena.plaza.repository;
 
-import java.util.List;
-import java.util.Optional;
-
-import org.springframework.data.jpa.repository.JpaRepository;
-
-import com.victorpena.plaza.model.Office;
-import com.victorpena.plaza.model.OfficeStatus;
+import com.victorpena.plaza.model.*;
+import jakarta.persistence.LockModeType;
+import java.util.*;
+import org.springframework.data.jpa.repository.*;
 
 public interface OfficeRepository extends JpaRepository<Office, Long> {
+  List<Office> findByPropertyCompanyIdOrderByPropertyNameAscOfficeNumberAsc(Long companyId);
 
-    List<Office> findByStatus(OfficeStatus status);
+  boolean existsByPropertyIdAndOfficeNumberAndIdNot(Long propertyId, String officeNumber, Long id);
 
-    Optional<Office> findByOfficeNumber(String officeNumber);
-
+  @Lock(LockModeType.PESSIMISTIC_WRITE)
+  @Query("select o from Office o where o.id=:id")
+  Optional<Office> lockById(Long id);
 }

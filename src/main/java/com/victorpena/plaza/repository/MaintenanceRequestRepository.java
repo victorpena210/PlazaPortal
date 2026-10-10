@@ -1,24 +1,16 @@
 package com.victorpena.plaza.repository;
 
-import java.util.List;
-
+import com.victorpena.plaza.model.*;
+import java.util.*;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.victorpena.plaza.model.MaintenanceRequest;
-import com.victorpena.plaza.model.MaintenanceRequestStatus;
-
 public interface MaintenanceRequestRepository extends JpaRepository<MaintenanceRequest, Long> {
-	
-	List<MaintenanceRequest> findByUserId(Long userId);
-	
-	List<MaintenanceRequest> findByOfficeId(Long officeId);
-	
-	List<MaintenanceRequest> findByStatus(MaintenanceRequestStatus status);
-	
-    List<MaintenanceRequest> findAllByOrderByCreatedAtDesc();
+  List<MaintenanceRequest> findByOfficePropertyCompanyIdOrderByCreatedAtDesc(Long companyId);
 
-    List<MaintenanceRequest> findByLeaseIdOrderByCreatedAtDesc(Long leaseId);
+  List<MaintenanceRequest> findByUserIdOrderByCreatedAtDesc(Long userId);
 
-		
-
+  @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+  @org.springframework.data.jpa.repository.Query(
+      "select r from MaintenanceRequest r where r.id=:id")
+  java.util.Optional<MaintenanceRequest> lockById(Long id);
 }

@@ -1,57 +1,44 @@
 package com.victorpena.plaza.service;
 
-import java.util.List;
-import java.util.Optional;
-
+import com.victorpena.plaza.model.*;
+import com.victorpena.plaza.repository.*;
+import java.util.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import com.victorpena.plaza.model.Role;
-import com.victorpena.plaza.model.User;
-import com.victorpena.plaza.repository.UserRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class UserService {
+  private final UserRepository users;
+  private final PasswordEncoder encoder;
 
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
+  public UserService(UserRepository users, PasswordEncoder encoder) {
+    this.users = users;
+    this.encoder = encoder;
+  }
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-    }
+  @Transactional
+  public User registerUser(String first, String last, String email, String password, Role role) {
+    email = Checks.email(email);
+    Checks.password(password);
+    if (users.existsByEmail(email))
+      throw new IllegalArgumentException(
+          "That email already has an account. Sign in or reset its password.");
+    var u = new User();
+    u.setFirstName(Checks.text(first, "First name", 100));
+    u.setLastName(Checks.text(last, "Last name", 100));
+    u.setEmail(email);
+    u.setPassword(encoder.encode(password));
+    u.setRole(role);
+    u.setEnabled(true);
+    return users.saveAndFlush(u);
+  }
 
-    public User registerUser(String firstName, String lastName, String email, String rawPassword, Role role) {
-        String normalizedEmail = email.trim().toLowerCase();
+  public Optional<User> findByEmail(String email) {
+    return users.findByEmail(email.trim().toLowerCase(java.util.Locale.ROOT));
+  }
 
-        if (userRepository.existsByEmail(normalizedEmail)) {
-            throw new IllegalArgumentException("Email is already in use.");
-        }
-
-        User user = new User();
-        user.setFirstName(firstName.trim());
-        user.setLastName(lastName.trim());
-        user.setEmail(normalizedEmail);
-        user.setPassword(passwordEncoder.encode(rawPassword));
-        user.setRole(role != null ? role : Role.TENANT);
-        user.setEnabled(true);
-
-        return userRepository.save(user);
-    }
-
-    public Optional<User> findByEmail(String email) {
-        return userRepository.findByEmail(email.trim().toLowerCase());
-    }
-
-    public boolean emailExists(String email) {
-        return userRepository.existsByEmail(email.trim().toLowerCase());
-    }
-
-    public List<User> findAll() {
-        return userRepository.findAll();
-    }
-    
-    public List<User> findTenants() {
-        return userRepository.findByRole(Role.TENANT);
-    }
+  public boolean emailExists(String email) {
+    return users.existsByEmail(email.trim().toLowerCase(java.util.Locale.ROOT));
+  }
 }

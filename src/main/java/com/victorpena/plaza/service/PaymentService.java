@@ -1,106 +1,86 @@
 package com.victorpena.plaza.service;
 
-import java.time.LocalDateTime;
-import java.util.List;
-
+import com.victorpena.plaza.model.*;
+import com.victorpena.plaza.repository.*;
+import java.time.*;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.victorpena.plaza.model.Invoice;
-import com.victorpena.plaza.model.InvoiceStatus;
-import com.victorpena.plaza.model.Payment;
-import com.victorpena.plaza.model.PaymentStatus;
-import com.victorpena.plaza.repository.InvoiceRepository;
-import com.victorpena.plaza.repository.PaymentRepository;
 
 @Service
 public class PaymentService {
+  private final PaymentTransactions transactions;
+  private final StripeGateway stripe;
+  private final PaymentRepository payments;
+  private final AccessService access;
 
-    private final PaymentRepository paymentRepository;
-    private final InvoiceRepository invoiceRepository;
+  public PaymentService(
+      PaymentTransactions transactions,
+      StripeGateway stripe,
+      PaymentRepository payments,
+      AccessService access) {
+    this.transactions = transactions;
+    this.stripe = stripe;
+    this.payments = payments;
+    this.access = access;
+  }
 
-    public PaymentService(
-            PaymentRepository paymentRepository,
-            InvoiceRepository invoiceRepository) {
-
-        this.paymentRepository = paymentRepository;
-        this.invoiceRepository = invoiceRepository;
+  public String checkout(Long invoiceId) {
+    var p = transactions.reserve(invoiceId);
+    if (!stripe
+        .account(p.getOffice().getProperty().getCompany().getId())
+        .equals(p.getStripeAccountId()))
+      throw new IllegalArgumentException("Payment account settings changed. Contact your manager.");
+    if (p.getStripeSessionId() != null) {
+      var s = stripe.retrieve(p.getStripeSessionId(), p.getStripeAccountId());
+      transactions.apply(null, s, p.getStripeAccountId(), "reconcile");
+      if ("open".equals(s.getStatus())) return s.getUrl();
+      if ("expired".equals(s.getStatus())) p = transactions.reserve(invoiceId);
+      else
+        throw new IllegalArgumentException(
+            "Payment is processing or completed. Refresh your invoices.");
     }
+    if (p.getCreatedAt().isBefore(LocalDateTime.now().minusHours(23)))
+      throw new IllegalArgumentException(
+          "This pending attempt needs a manager's review before retrying.");
+    var s = stripe.create(p);
+    transactions.attach(p.getId(), s);
+    return s.getUrl();
+  }
 
-    public List<Payment> findByUserId(Long userId) {
-        return paymentRepository.findByUserIdOrderByCreatedAtDesc(userId);
+  public void cancelCheckout(Long companyId, Long paymentId) {
+    var p = payments.findById(paymentId).orElseThrow(AccessService::missing);
+    access.sameCompany(companyId, p.getOffice().getProperty().getCompany());
+    if (p.getStripeSessionId() == null)
+      throw new IllegalArgumentException("This attempt must be recovered and verified first.");
+    var s = stripe.retrieve(p.getStripeSessionId(), p.getStripeAccountId());
+    if ("open".equals(s.getStatus()))
+      s = stripe.expire(p.getStripeSessionId(), p.getStripeAccountId());
+    transactions.apply(null, s, p.getStripeAccountId(), "reconcile");
+    if (!"expired".equals(s.getStatus()))
+      throw new IllegalArgumentException(
+          "This checkout has already been submitted. Wait for its confirmed result.");
+  }
+
+  public void reconcile(Long companyId, Long paymentId) {
+    var p = payments.findById(paymentId).orElseThrow(AccessService::missing);
+    access.sameCompany(companyId, p.getOffice().getProperty().getCompany());
+    if (p.getStripeSessionId() == null) {
+      if (!"STRIPE".equals(p.getPaymentMethod())
+          || p.getCreatedAt().isBefore(LocalDateTime.now().minusHours(23)))
+        throw new IllegalArgumentException(
+            "Review this attempt in Stripe; its safe automatic retry window has ended.");
+      var recovered = stripe.create(p);
+      transactions.attach(p.getId(), recovered);
+      p = payments.findById(paymentId).orElseThrow();
     }
-    
-    public List<Payment> findByLeaseId(Long leaseId) {
-        return paymentRepository.findByLeaseIdOrderByCreatedAtDesc(leaseId);
+    var s = stripe.retrieve(p.getStripeSessionId(), p.getStripeAccountId());
+    transactions.apply(null, s, p.getStripeAccountId(), "reconcile");
+    if ("paid".equals(s.getPaymentStatus())) {
+      var charge = stripe.latestCharge(s.getPaymentIntent(), p.getStripeAccountId());
+      if (charge != null && charge.getAmountRefunded() != null && charge.getAmountRefunded() > 0)
+        transactions.refund(
+            "refund-sync-" + charge.getId() + "-" + charge.getAmountRefunded(),
+            charge,
+            p.getStripeAccountId());
     }
-    
-
-    public List<Payment> findAll() {
-        return paymentRepository.findAllByOrderByCreatedAtDesc();
-    }
-
-    @Transactional
-    public Payment markAsPaid(Long paymentId) {
-
-        Payment payment = paymentRepository.findById(paymentId)
-                .orElseThrow(() ->
-                        new IllegalArgumentException(
-                                "Payment not found: " + paymentId
-                        ));
-
-        payment.setStatus(PaymentStatus.PAID);
-        payment.setPaidAt(LocalDateTime.now());
-
-        return paymentRepository.save(payment);
-    }
-
-    @Transactional
-    public Payment createPayment(Long invoiceId) {
-
-        Invoice invoice = invoiceRepository.findById(invoiceId)
-                .orElseThrow();
-
-        return createPayment(invoice);
-    }
-
-    @Transactional
-    private Payment createPayment(Invoice invoice) {
-
-        Payment payment = new Payment();
-
-        payment.setInvoice(invoice);
-        payment.setLease(invoice.getLease());
-
-        payment.setUser(invoice.getLease().getPortalAccess());
-        payment.setOffice(invoice.getLease().getOffice());
-        payment.setAmount(invoice.getAmount());
-        payment.setTotalAmount(invoice.getAmount());
-        payment.setStatus(PaymentStatus.PENDING);
-
-        return paymentRepository.save(payment);
-    }
-
-    @Transactional
-    public void completePayment(Long invoiceId) {
-
-        Invoice invoice = invoiceRepository.findById(invoiceId)
-                .orElseThrow();
-
-        if (invoice.getStatus() == InvoiceStatus.PAID) {
-            throw new RuntimeException("Invoice already paid");
-        }
-
-        Payment payment =
-                paymentRepository.findByInvoiceId(invoiceId)
-                        .orElseThrow();
-
-        payment.setStatus(PaymentStatus.PAID);
-        payment.setPaidAt(LocalDateTime.now());
-
-        invoice.setStatus(InvoiceStatus.PAID);
-
-        paymentRepository.save(payment);
-        invoiceRepository.save(invoice);
-    }
+  }
 }

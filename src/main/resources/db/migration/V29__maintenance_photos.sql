@@ -1,0 +1,1 @@
+CREATE TABLE maintenance_photos (id BIGINT PRIMARY KEY AUTO_INCREMENT,request_id BIGINT NOT NULL,storage_key VARCHAR(64) NOT NULL UNIQUE,original_name VARCHAR(255) NOT NULL,created_at DATETIME NOT NULL,FOREIGN KEY(request_id) REFERENCES maintenance_requests(id));

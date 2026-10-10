@@ -1,105 +1,56 @@
 package com.victorpena.plaza.service;
 
-import com.victorpena.plaza.model.Invoice;
-import com.victorpena.plaza.model.InvoiceStatus;
-import com.victorpena.plaza.model.Lease;
-import com.victorpena.plaza.repository.InvoiceRepository;
-import com.victorpena.plaza.repository.LeaseRepository;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
-
+import com.victorpena.plaza.model.*;
+import com.victorpena.plaza.repository.*;
+import org.slf4j.*;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 @Service
 public class InvoiceGenerationService {
-	
-	private final LeaseRepository leaseRepository;
-	private final InvoiceRepository invoiceRepository;
-	
-	public InvoiceGenerationService(LeaseRepository leaseRepository, InvoiceRepository invoiceRepository) {
-		this.leaseRepository = leaseRepository;
-		this.invoiceRepository = invoiceRepository;
-	}
+  private final LeaseRepository leases;
+  private final InvoiceRepository invoices;
+  private final OfficeRepository offices;
+  private final BillingService billing;
+  private final boolean enabled;
+  private static final Logger log = LoggerFactory.getLogger(InvoiceGenerationService.class);
 
-	@Scheduled(cron = "0 0 1 * * *")
-	public void generateInvoices() {
+  public InvoiceGenerationService(
+      LeaseRepository leases,
+      InvoiceRepository invoices,
+      OfficeRepository offices,
+      BillingService billing,
+      @Value("${app.jobs-enabled:true}") boolean enabled) {
+    this.leases = leases;
+    this.invoices = invoices;
+    this.offices = offices;
+    this.billing = billing;
+    this.enabled = enabled;
+  }
 
-	    LocalDate nextMonth =
-	            LocalDate.now()
-	                     .plusMonths(1)
-	                     .withDayOfMonth(1);
-
-	    List<Lease> activeLeases =
-	            leaseRepository.findByActiveTrue();
-	    
-	    
-	    for (Lease lease : activeLeases) {
-
-	        if (lease.getEndDate() == null) {
-	            continue;
-	        }
-
-	        if (LocalDate.now().isAfter(lease.getEndDate())) {
-
-	            lease.setActive(false);
-
-	            leaseRepository.save(lease);
-
-	            continue;
-	        }
-
-	        if (nextMonth.isAfter(lease.getEndDate())) {
-	            continue;
-	        }
-
-	        boolean exists =
-	                invoiceRepository.existsByLeaseAndDueDate(
-	                        lease,
-	                        nextMonth);
-
-	        if (!exists) {
-
-	            Invoice invoice = new Invoice();
-
-	            invoice.setLease(lease);
-	            invoice.setAmount(
-	                lease.getMonthlyRent()
-	            );
-	            invoice.setDueDate(nextMonth);
-	            invoice.setStatus(
-	                InvoiceStatus.PENDING
-	            );
-	            
-	            invoice.setCreatedAt(
-	                    LocalDateTime.now()
-	                );
-
-
-	            invoiceRepository.save(invoice);
-	        }
-	    }
-	}
-	
-	@Scheduled(cron = "0 30 1 * * *")
-	public void markOverdueInvoices() {
-
-	    List<Invoice> invoices =
-	            invoiceRepository.findByStatus(
-	                InvoiceStatus.PENDING);
-
-	    for (Invoice invoice : invoices) {
-
-	        if (invoice.getDueDate()
-	                .isBefore(LocalDate.now())) {
-
-	            invoice.setStatus(
-	                InvoiceStatus.OVERDUE);
-
-	            invoiceRepository.save(invoice);
-	        }
-	    }
-	}
+  @Scheduled(cron = "0 0 1 * * *", zone = "${app.time-zone:America/Chicago}")
+  public void runDaily() {
+    if (!enabled) return;
+    for (var l : leases.findByActiveTrue()) {
+      try {
+        billing.generate(l.getId());
+      } catch (Exception e) {
+        log.error("Invoice generation failed for lease {}", l.getId(), e);
+      }
+    }
+    for (var i : invoices.findAll()) {
+      try {
+        billing.updateOverdue(i.getId());
+      } catch (Exception e) {
+        log.error("Invoice update failed for {}", i.getId(), e);
+      }
+    }
+    for (var o : offices.findAll()) {
+      boolean occupied = !leases.overlapping(o.getId(), billing.today(), billing.today()).isEmpty();
+      if (occupied) o.setStatus(OfficeStatus.OCCUPIED);
+      else if (o.getStatus() == OfficeStatus.OCCUPIED) o.setStatus(OfficeStatus.AVAILABLE);
+      offices.save(o);
+    }
+  }
 }
