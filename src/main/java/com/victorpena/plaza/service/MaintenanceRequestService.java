@@ -1,67 +1,89 @@
 package com.victorpena.plaza.service;
 
-import java.util.List;
-
+import com.victorpena.plaza.model.*;
+import com.victorpena.plaza.repository.*;
+import java.time.*;
 import org.springframework.stereotype.Service;
-
-import com.victorpena.plaza.model.Lease;
-import com.victorpena.plaza.model.MaintenanceRequest;
-import com.victorpena.plaza.model.MaintenanceRequestStatus;
-import com.victorpena.plaza.repository.LeaseRepository;
-import com.victorpena.plaza.repository.MaintenanceRequestRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class MaintenanceRequestService {
+  private final MaintenanceRequestRepository requests;
+  private final LeaseRepository leases;
+  private final AccessService access;
+  private final NotificationService mail;
+  private final AuditService audit;
+  private final BillingService billing;
 
-    private final MaintenanceRequestRepository maintenanceRequestRepository;
-    private final LeaseRepository leaseRepository;
+  public MaintenanceRequestService(
+      MaintenanceRequestRepository requests,
+      LeaseRepository leases,
+      AccessService access,
+      NotificationService mail,
+      AuditService audit,
+      BillingService billing) {
+    this.requests = requests;
+    this.leases = leases;
+    this.access = access;
+    this.mail = mail;
+    this.audit = audit;
+    this.billing = billing;
+  }
 
-    public MaintenanceRequestService(
-            MaintenanceRequestRepository maintenanceRequestRepository,
-            LeaseRepository leaseRepository) {
-    	this.maintenanceRequestRepository = maintenanceRequestRepository;
-    	this.leaseRepository = leaseRepository;
-    }
+  @Transactional
+  public void create(Long leaseId, String title, String description, PriorityLevel priority) {
+    var l = leases.findById(leaseId).orElseThrow(AccessService::missing);
+    access.tenant(l);
+    if (!l.isActive()
+        || billing.today().isBefore(l.getStartDate())
+        || (l.getEndDate() != null && billing.today().isAfter(l.getEndDate())))
+      throw new IllegalArgumentException("Select a current lease.");
+    var r = new MaintenanceRequest();
+    r.setLease(l);
+    r.setOffice(l.getOffice());
+    r.setUser(access.user());
+    r.setTitle(Checks.text(title, "Title", 150));
+    r.setDescription(Checks.text(description, "Description", 10000));
+    r.setPriority(priority);
+    requests.saveAndFlush(r);
+    var c = l.getOffice().getProperty().getCompany();
+    mail.owners(
+        c,
+        "Maintenance request · " + l.getOffice().getOfficeNumber(),
+        r.getTitle() + ". Review request " + r.getId() + ": " + mail.url("/admin/maintenance"));
+    audit.record(c, access.user().getEmail(), "MAINTENANCE_CREATED", "Request " + r.getId());
+  }
 
-    public MaintenanceRequest createRequest(Long userId, Long officeId, String title, String description) {
-    	Lease lease = leaseRepository
-    	        .findByPortalAccess_IdAndOffice_IdAndActiveTrue(userId, officeId)
-    	        .orElseThrow(() ->
-    	                new RuntimeException("Active lease not found"));
+  @Transactional
+  public void update(Long companyId, Long id, MaintenanceRequestStatus status, String note) {
+    var r = requests.findById(id).orElseThrow(AccessService::missing);
+    var c = r.getOffice().getProperty().getCompany();
+    access.sameCompany(companyId, c);
+    r.setStatus(status);
+    r.setAdminNote(note == null || note.isBlank() ? null : Checks.text(note, "Update", 5000));
+    r.setCompletedAt(status == MaintenanceRequestStatus.COMPLETED ? LocalDateTime.now() : null);
+    mail.send(
+        r.getUser().getEmail(),
+        "Maintenance update",
+        r.getTitle()
+            + ": "
+            + status
+            + ". "
+            + (r.getAdminNote() == null ? "" : r.getAdminNote())
+            + " View: "
+            + mail.url("/tenant/dashboard"));
+    audit.record(
+        c, access.user().getEmail(), "MAINTENANCE_UPDATED", "Request " + id + " → " + status);
+  }
 
-
-        MaintenanceRequest request = new MaintenanceRequest();
-        request.setLease(lease);
-        request.setUser(lease.getPortalAccess());
-        request.setOffice(lease.getOffice());
-        request.setTitle(title.trim());
-        request.setDescription(description.trim());
-        request.setStatus(MaintenanceRequestStatus.OPEN);
-
-        return maintenanceRequestRepository.save(request);
-    }
-
-    public List<MaintenanceRequest> findByUserId(Long userId) {
-        return maintenanceRequestRepository.findByUserId(userId);
-    }
-    
-    public List<MaintenanceRequest> findByLeaseId(Long leaseId) {
-        return maintenanceRequestRepository
-                .findByLeaseIdOrderByCreatedAtDesc(leaseId);
-    }
-
-    public List<MaintenanceRequest> findAll() {
-        return maintenanceRequestRepository.findAllByOrderByCreatedAtDesc();
-    }
-
-    public MaintenanceRequest findById(Long id) {
-        return maintenanceRequestRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Maintenance request not found: " + id));
-    }
-
-    public void updateStatus(Long requestId, MaintenanceRequestStatus status) {
-        MaintenanceRequest request = findById(requestId);
-        request.setStatus(status);
-        maintenanceRequestRepository.save(request);
-    }
+  @Transactional
+  public void comment(Long id, String comment) {
+    var r = requests.findById(id).orElseThrow(AccessService::missing);
+    if (!r.getUser().getId().equals(access.user().getId())) throw AccessService.missing();
+    r.setTenantComment(Checks.text(comment, "Comment", 5000));
+    mail.owners(
+        r.getOffice().getProperty().getCompany(),
+        "Tenant maintenance comment",
+        "Request " + id + " has a tenant update. " + mail.url("/admin/maintenance"));
+  }
 }

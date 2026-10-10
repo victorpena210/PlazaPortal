@@ -1,7 +1,5 @@
 package com.victorpena.plaza.model;
 
-import java.time.LocalDateTime;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -15,191 +13,189 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "maintenance_requests")
 public class MaintenanceRequest {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @Column(nullable = false, length = 150)
-    private String title;
+  @Column(nullable = false, length = 150)
+  private String title;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
-    private String description;
+  @Column(nullable = false, columnDefinition = "TEXT")
+  private String description;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 30)
-    private MaintenanceRequestStatus status;
+  @Enumerated(EnumType.STRING)
+  @Column(nullable = false, length = 30)
+  private MaintenanceRequestStatus status;
 
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
+  @Column(name = "created_at", nullable = false)
+  private LocalDateTime createdAt;
 
-    @ManyToOne
-    @JoinColumn(name = "lease_id")
-    private Lease lease;
-    
-    
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
-    
+  @ManyToOne
+  @JoinColumn(name = "lease_id")
+  private Lease lease;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "office_id", nullable = false)
-    private Office office;
-    
-    @Enumerated(EnumType.STRING)
-    @Column(length = 20)
-    private PriorityLevel priority;
+  @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  @JoinColumn(name = "user_id", nullable = false)
+  private User user;
 
-    @Column(length = 255)
-    private String imageUrl;
+  @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  @JoinColumn(name = "office_id", nullable = false)
+  private Office office;
 
-    @Column(columnDefinition = "TEXT")
-    private String tenantComment;
+  @Enumerated(EnumType.STRING)
+  @Column(length = 20)
+  private PriorityLevel priority;
 
-    @Column(columnDefinition = "TEXT")
-    private String adminNote;
+  @Column(length = 255)
+  private String imageUrl;
 
-    private LocalDateTime completedAt;
+  @Column(columnDefinition = "TEXT")
+  private String tenantComment;
 
-    private LocalDateTime updatedAt;
+  @Column(columnDefinition = "TEXT")
+  private String adminNote;
 
-    @PrePersist
-    public void prePersist() {
+  private LocalDateTime completedAt;
 
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
+  private LocalDateTime updatedAt;
 
-        if (this.status == null) {
-            this.status = MaintenanceRequestStatus.OPEN;
-        }
+  @PrePersist
+  public void prePersist() {
 
-        if (this.priority == null) {
-            this.priority = PriorityLevel.MEDIUM;
-        }
-    }
-    
-    @PreUpdate
-    public void preUpdate() {
-        this.updatedAt = LocalDateTime.now();
+    this.createdAt = LocalDateTime.now();
+    this.updatedAt = LocalDateTime.now();
+
+    if (this.status == null) {
+      this.status = MaintenanceRequestStatus.OPEN;
     }
 
-    public MaintenanceRequest() {
+    if (this.priority == null) {
+      this.priority = PriorityLevel.MEDIUM;
     }
+  }
 
-    public Long getId() {
-        return id;
-    }
+  @PreUpdate
+  public void preUpdate() {
+    this.updatedAt = LocalDateTime.now();
+  }
 
-    public String getTitle() {
-        return title;
-    }
+  public MaintenanceRequest() {}
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
+  public Long getId() {
+    return id;
+  }
 
-    public String getDescription() {
-        return description;
-    }
+  public String getTitle() {
+    return title;
+  }
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
+  public void setTitle(String title) {
+    this.title = title;
+  }
 
-    public MaintenanceRequestStatus getStatus() {
-        return status;
-    }
+  public String getDescription() {
+    return description;
+  }
 
-    public void setStatus(MaintenanceRequestStatus status) {
-        this.status = status;
-    }
+  public void setDescription(String description) {
+    this.description = description;
+  }
 
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
+  public MaintenanceRequestStatus getStatus() {
+    return status;
+  }
 
-    public User getUser() {
-        return user;
-    }
+  public void setStatus(MaintenanceRequestStatus status) {
+    this.status = status;
+  }
 
-    public void setUser(User user) {
-        this.user = user;
-    }
+  public LocalDateTime getCreatedAt() {
+    return createdAt;
+  }
 
-    public Office getOffice() {
-        return office;
-    }
+  public User getUser() {
+    return user;
+  }
 
-    public void setOffice(Office office) {
-        this.office = office;
-    }
-    
-    public PriorityLevel getPriority() {
-        return priority;
-    }
+  public void setUser(User user) {
+    this.user = user;
+  }
 
-    public void setPriority(PriorityLevel priority) {
-        this.priority = priority;
-    }
+  public Office getOffice() {
+    return office;
+  }
 
-    public String getImageUrl() {
-        return imageUrl;
-    }
+  public void setOffice(Office office) {
+    this.office = office;
+  }
 
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
-    }
+  public PriorityLevel getPriority() {
+    return priority;
+  }
 
-    public String getTenantComment() {
-        return tenantComment;
-    }
+  public void setPriority(PriorityLevel priority) {
+    this.priority = priority;
+  }
 
-    public void setTenantComment(String tenantComment) {
-        this.tenantComment = tenantComment;
-    }
+  public String getImageUrl() {
+    return imageUrl;
+  }
 
-    public String getAdminNote() {
-        return adminNote;
-    }
+  public void setImageUrl(String imageUrl) {
+    this.imageUrl = imageUrl;
+  }
 
-    public void setAdminNote(String adminNote) {
-        this.adminNote = adminNote;
-    }
+  public String getTenantComment() {
+    return tenantComment;
+  }
 
-    public LocalDateTime getCompletedAt() {
-        return completedAt;
-    }
+  public void setTenantComment(String tenantComment) {
+    this.tenantComment = tenantComment;
+  }
 
-    public void setCompletedAt(LocalDateTime completedAt) {
-        this.completedAt = completedAt;
-    }
+  public String getAdminNote() {
+    return adminNote;
+  }
 
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
+  public void setAdminNote(String adminNote) {
+    this.adminNote = adminNote;
+  }
 
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
+  public LocalDateTime getCompletedAt() {
+    return completedAt;
+  }
 
-	public Lease getLease() {
-		return lease;
-	}
+  public void setCompletedAt(LocalDateTime completedAt) {
+    this.completedAt = completedAt;
+  }
 
-	public void setLease(Lease lease) {
-		this.lease = lease;
-	}
+  public LocalDateTime getUpdatedAt() {
+    return updatedAt;
+  }
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+  public void setUpdatedAt(LocalDateTime updatedAt) {
+    this.updatedAt = updatedAt;
+  }
 
-	public void setCreatedAt(LocalDateTime createdAt) {
-		this.createdAt = createdAt;
-	}
+  public Lease getLease() {
+    return lease;
+  }
+
+  public void setLease(Lease lease) {
+    this.lease = lease;
+  }
+
+  public void setId(Long id) {
+    this.id = id;
+  }
+
+  public void setCreatedAt(LocalDateTime createdAt) {
+    this.createdAt = createdAt;
+  }
 }

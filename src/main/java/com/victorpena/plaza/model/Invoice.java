@@ -1,86 +1,125 @@
 package com.victorpena.plaza.model;
+
+import jakarta.persistence.*;
 import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-
+import java.time.*;
 
 @Entity
-@Table(name = "invoice")
+@Table(
+    name = "invoice",
+    uniqueConstraints = @UniqueConstraint(columnNames = {"lease_id", "billing_period", "kind"}))
 public class Invoice {
-	
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @ManyToOne
-    private Lease lease;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "lease_id", nullable = false)
+  private Lease lease;
 
-    private BigDecimal amount;
+  @Column(precision = 10, scale = 2)
+  private BigDecimal amount;
 
-    private LocalDate dueDate;
+  private LocalDate dueDate;
 
-    @Enumerated(EnumType.STRING)
-    private InvoiceStatus status;
+  @Enumerated(EnumType.STRING)
+  @Column(length = 50)
+  private InvoiceStatus status = InvoiceStatus.PENDING;
 
-    private LocalDateTime createdAt;
+  private LocalDateTime createdAt;
 
-	public Long getId() {
-		return id;
-	}
+  private LocalDate billingPeriod;
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+  @Column(nullable = false, length = 20)
+  private String kind = "RENT";
 
-	public Lease getLease() {
-		return lease;
-	}
+  @Column(length = 255)
+  private String description;
 
-	public void setLease(Lease lease) {
-		this.lease = lease;
-	}
+  @Column(nullable = false, precision = 10, scale = 2)
+  private BigDecimal lateFeeAmount = BigDecimal.ZERO;
 
-	public BigDecimal getAmount() {
-		return amount;
-	}
+  public Long getId() {
+    return id;
+  }
 
-	public void setAmount(BigDecimal amount) {
-		this.amount = amount;
-	}
+  public void setId(Long value) {
+    this.id = value;
+  }
 
-	public LocalDate getDueDate() {
-		return dueDate;
-	}
+  public Lease getLease() {
+    return lease;
+  }
 
-	public void setDueDate(LocalDate dueDate) {
-		this.dueDate = dueDate;
-	}
+  public void setLease(Lease value) {
+    this.lease = value;
+  }
 
-	public InvoiceStatus getStatus() {
-		return status;
-	}
+  public BigDecimal getAmount() {
+    return amount;
+  }
 
-	public void setStatus(InvoiceStatus status) {
-		this.status = status;
-	}
+  public void setAmount(BigDecimal value) {
+    this.amount = value;
+  }
 
-	public LocalDateTime getCreatedAt() {
-		return createdAt;
-	}
+  public LocalDate getDueDate() {
+    return dueDate;
+  }
 
-	public void setCreatedAt(LocalDateTime createdAt) {
-		this.createdAt = createdAt;
-	}
-	
-    
+  public void setDueDate(LocalDate value) {
+    this.dueDate = value;
+  }
 
+  public InvoiceStatus getStatus() {
+    return status;
+  }
+
+  public void setStatus(InvoiceStatus value) {
+    this.status = value;
+  }
+
+  public LocalDateTime getCreatedAt() {
+    return createdAt;
+  }
+
+  public void setCreatedAt(LocalDateTime value) {
+    this.createdAt = value;
+  }
+
+  public LocalDate getBillingPeriod() {
+    return billingPeriod;
+  }
+
+  public void setBillingPeriod(LocalDate value) {
+    this.billingPeriod = value;
+  }
+
+  public String getKind() {
+    return kind;
+  }
+
+  public void setKind(String value) {
+    this.kind = value;
+  }
+
+  public String getDescription() {
+    return description;
+  }
+
+  public void setDescription(String value) {
+    this.description = value;
+  }
+
+  public BigDecimal getLateFeeAmount() {
+    return lateFeeAmount;
+  }
+
+  public void setLateFeeAmount(BigDecimal value) {
+    this.lateFeeAmount = value;
+  }
+
+  public BigDecimal getTotal() {
+    return amount.add(lateFeeAmount);
+  }
 }

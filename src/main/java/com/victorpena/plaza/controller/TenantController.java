@@ -1,196 +1,116 @@
 package com.victorpena.plaza.controller;
 
-import java.util.List;
-
-import com.victorpena.plaza.model.Invoice;
-import com.victorpena.plaza.model.Lease;
-import com.victorpena.plaza.model.Office;
-import com.victorpena.plaza.model.User;
-import com.victorpena.plaza.service.InvoiceService;
-import com.victorpena.plaza.service.LeaseService;
-import com.victorpena.plaza.service.MaintenanceRequestService;
-import com.victorpena.plaza.service.PaymentService;
-import com.victorpena.plaza.service.UserService;
-
-import org.springframework.security.core.Authentication;
+import com.victorpena.plaza.model.*;
+import com.victorpena.plaza.repository.*;
+import com.victorpena.plaza.service.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
+import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RequestMapping("/tenant")
 public class TenantController {
+  private final AccessService access;
+  private final LeaseRepository leases;
+  private final InvoiceRepository invoices;
+  private final PaymentRepository payments;
+  private final MaintenanceRequestRepository requests;
+  private final MaintenanceRequestService maintenance;
+  private final BillingService billing;
+  private final StripeGateway stripe;
+  private final StoredDocumentRepository documents;
 
-    private final UserService userService;
-    private final LeaseService leaseService;    
-    private final MaintenanceRequestService maintenanceRequestService;
-    private final PaymentService paymentService;
-    private final InvoiceService invoiceService;
-    
+  public TenantController(
+      AccessService access,
+      LeaseRepository leases,
+      InvoiceRepository invoices,
+      PaymentRepository payments,
+      MaintenanceRequestRepository requests,
+      MaintenanceRequestService maintenance,
+      BillingService billing,
+      StripeGateway stripe,
+      StoredDocumentRepository documents) {
+    this.access = access;
+    this.leases = leases;
+    this.invoices = invoices;
+    this.payments = payments;
+    this.requests = requests;
+    this.maintenance = maintenance;
+    this.billing = billing;
+    this.stripe = stripe;
+    this.documents = documents;
+  }
 
-    public TenantController(UserService userService, LeaseService leaseService, MaintenanceRequestService maintenanceRequestService, PaymentService paymentService, InvoiceService invoiceService) {
-        this.userService = userService;
-        this.leaseService = leaseService;
-        this.maintenanceRequestService = maintenanceRequestService;
-        this.paymentService = paymentService;
-        this.invoiceService = invoiceService;
-    }
+  @GetMapping("/dashboard")
+  public String dashboard(Model m) {
+    var id = access.user().getId();
+    m.addAttribute("leases", leases.findByPortalAccessIdOrderByStartDateDesc(id));
+    m.addAttribute("requests", requests.findByUserIdOrderByCreatedAtDesc(id));
+    return "tenant-dashboard";
+  }
 
-    @GetMapping("/dashboard")
-    public String dashboard(Authentication authentication, Model model) {
-        String email = authentication.getName();
+  @GetMapping("/maintenance/new")
+  public String maintenance(Model m) {
+    m.addAttribute(
+        "leases",
+        leases.findByPortalAccessIdOrderByStartDateDesc(access.user().getId()).stream()
+            .filter(
+                l ->
+                    l.isActive()
+                        && !billing.today().isBefore(l.getStartDate())
+                        && (l.getEndDate() == null || !billing.today().isAfter(l.getEndDate())))
+            .toList());
+    return "tenant-maintenance-form";
+  }
 
-        User user = userService.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("User not found: " + email));
-        
-        model.addAttribute("user", user);
+  @PostMapping("/maintenance")
+  public String create(
+      @RequestParam Long leaseId,
+      @RequestParam String title,
+      @RequestParam String description,
+      @RequestParam(defaultValue = "MEDIUM") PriorityLevel priority) {
+    maintenance.create(leaseId, title, description, priority);
+    return "redirect:/tenant/dashboard";
+  }
 
-        
-        Lease lease = leaseService.findActiveLeaseByTenantId(user.getId());
+  @PostMapping("/maintenance/{id}/comment")
+  public String comment(@PathVariable Long id, @RequestParam String comment) {
+    maintenance.comment(id, comment);
+    return "redirect:/tenant/dashboard";
+  }
 
-        List<Office> offices = leaseService.findOfficesByTenantId(user.getId());
+  @GetMapping("/invoices")
+  public String invoices(Model m) {
+    m.addAttribute(
+        "invoices", invoices.findByLeasePortalAccessIdOrderByDueDateDesc(access.user().getId()));
+    m.addAttribute("billing", billing);
+    m.addAttribute("stripe", stripe);
+    return "tenant-invoices";
+  }
 
-        model.addAttribute("offices", offices);
+  @GetMapping("/payments/new")
+  public String newPayment() {
+    return "redirect:/tenant/invoices";
+  }
 
-        if (lease != null) {
+  @GetMapping("/payments")
+  public String payments(Model m) {
+    m.addAttribute("payments", payments.findByUserIdOrderByCreatedAtDesc(access.user().getId()));
+    return "tenant-payments";
+  }
 
-            model.addAttribute(
-                    "maintenanceRequests",
-                    maintenanceRequestService.findByLeaseId(lease.getId())
-            );
+  @GetMapping("/lease")
+  public String leases(Model m) {
+    m.addAttribute(
+        "leases", leases.findByPortalAccessIdOrderByStartDateDesc(access.user().getId()));
+    m.addAttribute("documents", documents);
+    return "tenant-lease";
+  }
 
-            model.addAttribute(
-                    "payments",
-                    paymentService.findByLeaseId(lease.getId())
-            );
-        }
-
-        return "tenant-dashboard";
-    }
-    
-    @GetMapping("/maintenance/new")
-    public String showMaintenanceRequestForm(Authentication authentication, Model model) {
-        String email = authentication.getName();
-
-        User user = userService.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("User not found: " + email));
-
-        model.addAttribute("user", user);
-        model.addAttribute("offices", leaseService.findOfficesByTenantId(user.getId()));
-
-        return "tenant-maintenance-form";
-    }
-    
-    @PostMapping("/maintenance")
-    public String submitMaintenanceRequest(
-            Authentication authentication,
-            @RequestParam Long officeId,
-            @RequestParam String title,
-            @RequestParam String description,
-            RedirectAttributes redirectAttributes) {
-
-        String email = authentication.getName();
-
-        User user = userService.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("User not found: " + email));
-
-        try {
-            maintenanceRequestService.createRequest(user.getId(), officeId, title, description);
-            redirectAttributes.addFlashAttribute("successMessage", "Maintenance request submitted successfully.");
-        } catch (IllegalArgumentException e) {
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-        }
-
-        return "redirect:/tenant/dashboard";
-    }
-    
-    @GetMapping("/payments/new")
-    public String showPaymentForm(Authentication authentication, Model model) {
-    	String email = authentication.getName();
-    	User user = userService.findByEmail(email)
-    			.orElseThrow(() -> new IllegalArgumentException("User not found: " + email));
-    	
-    	model.addAttribute("user", user);
-    	model.addAttribute("offices", leaseService.findOfficesByTenantId(user.getId()));
-    	model.addAttribute("payments", paymentService.findByUserId(user.getId()));
-    	
-    	return "tenant-payment-form";
-    	
-    }
-    
-    @GetMapping("/payments")
-    public String tenantPayments(
-            Authentication authentication,
-            Model model
-    ) {
-
-        User user = userService.findByEmail(authentication.getName())
-                .orElseThrow(() ->
-                        new IllegalArgumentException("User not found"));
-
-        List<Office> offices = leaseService.findOfficesByTenantId(user.getId());
-
-        model.addAttribute(
-                "payments",
-                paymentService.findByUserId(user.getId())
-        );
-
-        model.addAttribute(
-                "offices",
-                offices
-        );
-
-        return "tenant-payments";
-    }
-    
-    @GetMapping("/invoices")
-    public String invoices(Model model, Authentication authentication) {
-    	
-        User user =
-                userService.findByEmail(authentication.getName())
-                        .orElseThrow();
-
-        model.addAttribute(
-                "invoices",
-                invoiceService.findByTenantId(user.getId()));
-        
-
-        return "tenant-invoices";    	
-    }
-    
-    @GetMapping("/pay/{invoiceId}")
-    public String payInvoice(@PathVariable Long invoiceId, Model model) {
-    	
-    	Invoice invoice =
-    	        invoiceService.findById(invoiceId);    	model.addAttribute("invoice", invoice);
-    	
-    	        
-    	model.addAttribute("invoice", invoice);
-    	
-    	return "payment-checkout";
-    }
-    
-    @GetMapping("/lease")
-    public String viewLease(
-            Authentication authentication,
-            Model model) {
-
-        User user = userService
-                .findByEmail(authentication.getName())
-                .orElseThrow();
-
-        model.addAttribute(
-                "leases",
-                leaseService.findLeasesByTenantId(user.getId())
-        );
-
-        return "tenant-lease";
-    }
-    
+  @GetMapping("/pay/{id}")
+  public String oldCheckout(@PathVariable Long id) {
+    var i = invoices.findById(id).orElseThrow(AccessService::missing);
+    access.tenant(i.getLease());
+    return "redirect:/tenant/invoices";
+  }
 }

@@ -1,83 +1,79 @@
 package com.victorpena.plaza.config;
 
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import com.victorpena.plaza.controller.CustomLoginSuccessHandler;
+import com.victorpena.plaza.service.CustomUserDetailsService;
+import org.springframework.context.annotation.*;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
-import com.victorpena.plaza.controller.CustomLoginSuccessHandler;
-import com.victorpena.plaza.service.CustomUserDetailsService;
-
 @Configuration
 public class SecurityConfig {
+  @Bean
+  SecurityFilterChain securityFilterChain(
+      HttpSecurity http, CustomLoginSuccessHandler handler, SessionRegistry registry)
+      throws Exception {
+    http.addFilterBefore(
+            new AuthRateLimitFilter(),
+            org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
+                .class)
+        .authorizeHttpRequests(
+            a ->
+                a.requestMatchers(
+                        "/",
+                        "/login",
+                        "/register",
+                        "/join",
+                        "/signup",
+                        "/forgot-password",
+                        "/reset-password",
+                        "/css/**",
+                        "/images/**",
+                        "/error",
+                        "/error/**",
+                        "/webhooks/stripe",
+                        "/health")
+                    .permitAll()
+                    .anyRequest()
+                    .authenticated())
+        .csrf(c -> c.ignoringRequestMatchers("/webhooks/stripe"))
+        .formLogin(
+            f ->
+                f.loginPage("/login")
+                    .successHandler(handler)
+                    .failureUrl("/login?error")
+                    .permitAll())
+        .logout(
+            l ->
+                l.logoutSuccessUrl("/login?logout")
+                    .invalidateHttpSession(true)
+                    .deleteCookies("JSESSIONID"))
+        .sessionManagement(s -> s.maximumSessions(-1).sessionRegistry(registry))
+        .headers(
+            h ->
+                h.contentSecurityPolicy(
+                    c ->
+                        c.policyDirectives(
+                            "default-src 'self'; img-src 'self' data:; style-src 'self'; script-src"
+                                + " 'self'; frame-ancestors 'none'; base-uri 'self'; form-action"
+                                + " 'self'")))
+        .exceptionHandling(e -> e.accessDeniedPage("/error/403"));
+    return http.build();
+  }
 
-    private final CustomLoginSuccessHandler customLoginSuccessHandler;
+  @Bean
+  DaoAuthenticationProvider authenticationProvider(
+      CustomUserDetailsService details, PasswordEncoder encoder) {
+    var p = new DaoAuthenticationProvider(details);
+    p.setPasswordEncoder(encoder);
+    return p;
+  }
 
-    public SecurityConfig(CustomLoginSuccessHandler customLoginSuccessHandler) {
-        this.customLoginSuccessHandler = customLoginSuccessHandler;
-    }
-
-    @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-
-        http
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers(
-                    "/",
-                    "/login",
-                    "/register",
-                    "/css/**",
-                    "/js/**",
-                    "/images/**"
-                ).permitAll()
-
-                .requestMatchers("/admin/**").hasRole("ADMIN")
-                .requestMatchers("/tenant/**").hasRole("TENANT")
-
-                .anyRequest().authenticated()
-            )
-
-            .formLogin(form -> form
-                .loginPage("/login")
-                .successHandler(customLoginSuccessHandler)
-                .failureUrl("/login?error")
-                .permitAll()
-            )
-
-            .logout(logout -> logout
-                .logoutSuccessUrl("/login?logout")
-                .permitAll()
-            )
-        
-        .exceptionHandling(exception -> exception
-                .accessDeniedPage("/error/403")
-            );
-
-
-        return http.build();
-    }
-
-    @Bean
-    UserDetailsService userDetailsService(CustomUserDetailsService customUserDetailsService) {
-        return customUserDetailsService;
-    }
-
-    @Bean
-    DaoAuthenticationProvider authenticationProvider(
-            CustomUserDetailsService customUserDetailsService,
-            PasswordEncoder passwordEncoder) {
-
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider(customUserDetailsService);
-        provider.setPasswordEncoder(passwordEncoder);
-        return provider;
-    }
-
-    @Bean
-    PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+  @Bean
+  PasswordEncoder passwordEncoder() {
+    return new BCryptPasswordEncoder();
+  }
 }

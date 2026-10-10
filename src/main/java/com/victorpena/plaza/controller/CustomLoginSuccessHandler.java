@@ -1,40 +1,32 @@
 package com.victorpena.plaza.controller;
 
+import com.victorpena.plaza.service.AccessService;
+import jakarta.servlet.http.*;
 import java.io.IOException;
-import java.util.Collection;
-
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-
 @Component
 public class CustomLoginSuccessHandler implements AuthenticationSuccessHandler {
+  private final AccessService access;
 
-    @Override
-    public void onAuthenticationSuccess(
-            HttpServletRequest request,
-            HttpServletResponse response,
-            Authentication authentication) throws IOException, ServletException {
+  public CustomLoginSuccessHandler(AccessService access) {
+    this.access = access;
+  }
 
-        Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
-
-        for (GrantedAuthority authority : authorities) {
-            if (authority.getAuthority().equals("ROLE_ADMIN")) {
-                response.sendRedirect("/admin/dashboard");
-                return;
-            }
-
-            if (authority.getAuthority().equals("ROLE_TENANT")) {
-                response.sendRedirect("/tenant/dashboard");
-                return;
-            }
-        }
-
-        response.sendRedirect("/");
+  public void onAuthenticationSuccess(
+      HttpServletRequest request, HttpServletResponse response, Authentication auth)
+      throws IOException {
+    var session = request.getSession();
+    Object next = session.getAttribute("inviteReturn");
+    session.removeAttribute("inviteReturn");
+    if (next instanceof String url
+        && (url.startsWith("/register?token=") || url.startsWith("/join?token="))) {
+      response.sendRedirect(url);
+      return;
     }
+    response.sendRedirect(
+        access.memberships().isEmpty() ? "/tenant/dashboard" : "/admin/dashboard");
+  }
 }

@@ -1,34 +1,40 @@
 package com.victorpena.plaza.controller;
 
+import com.victorpena.plaza.repository.*;
+import com.victorpena.plaza.service.*;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-
-import com.victorpena.plaza.service.PaymentService;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
 
 @Controller
 public class PaymentController {
+  private final PaymentService payments;
+  private final PaymentRepository records;
+  private final AccessService access;
 
-    private final PaymentService paymentService;
+  public PaymentController(
+      PaymentService payments, PaymentRepository records, AccessService access) {
+    this.payments = payments;
+    this.records = records;
+    this.access = access;
+  }
 
-    public PaymentController(PaymentService paymentService) {
-        this.paymentService = paymentService;
-    }
+  @PostMapping({"/pay/{id}", "/tenant/invoices/{id}/checkout"})
+  public String checkout(@PathVariable Long id) {
+    String url = payments.checkout(id);
+    if (url == null || !url.startsWith("https://checkout.stripe.com/"))
+      throw new IllegalStateException("Unexpected checkout URL.");
+    return "redirect:" + url;
+  }
 
-    @PostMapping("/tenant/payments")
-    public String submitPayment(@RequestParam Long invoiceId) {
-
-        paymentService.createPayment(invoiceId);
-
-        return "redirect:/tenant/payments";
-    }
-
-    @PostMapping("/pay/{invoiceId}")
-    public String payInvoice(@PathVariable Long invoiceId) {
-
-        paymentService.completePayment(invoiceId);
-
-        return "redirect:/tenant/invoice";
-    }
+  @GetMapping("/receipts/{id}")
+  public String receipt(@PathVariable Long id, Model m) {
+    var p = records.findById(id).orElseThrow(AccessService::missing);
+    if (p.getLease() != null) access.leaseRead(p.getLease());
+    else access.member(p.getOffice().getProperty().getCompany().getId());
+    if (p.getPaidAt() == null)
+      throw new IllegalArgumentException("A receipt is available after payment is received.");
+    m.addAttribute("payment", p);
+    return "receipt";
+  }
 }

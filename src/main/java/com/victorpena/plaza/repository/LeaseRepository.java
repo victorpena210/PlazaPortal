@@ -1,28 +1,24 @@
 package com.victorpena.plaza.repository;
 
-import java.util.List;
-import java.util.Optional;
-
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import com.victorpena.plaza.model.Lease;
+import com.victorpena.plaza.model.*;
+import jakarta.persistence.LockModeType;
+import java.time.LocalDate;
+import java.util.*;
+import org.springframework.data.jpa.repository.*;
 
 public interface LeaseRepository extends JpaRepository<Lease, Long> {
+  List<Lease> findByOfficePropertyCompanyIdOrderByStartDateDesc(Long companyId);
 
-    List<Lease> findByActiveTrue();
+  List<Lease> findByPortalAccessIdOrderByStartDateDesc(Long userId);
 
-    List<Lease> findByPortalAccess_Id(Long userId);
+  List<Lease> findByActiveTrue();
 
-    Optional<Lease> findByPortalAccess_IdAndOffice_IdAndActiveTrue(
-            Long userId,
-            Long officeId);
+  @Query(
+      "select l from Lease l where l.office.id=:officeId and l.active=true and l.startDate<=:end"
+          + " and (l.endDate is null or l.endDate>=:start)")
+  List<Lease> overlapping(Long officeId, LocalDate start, LocalDate end);
 
-    @Query("SELECT l FROM Lease l WHERE l.tenantEmail = :tenantEmail")
-    Optional<Lease> findByTenantEmail(String tenantEmail);
-
-    @Query("SELECT l FROM Lease l WHERE l.portalAccess.id = :userId AND l.active = TRUE")
-    List<Lease> findByPortalAccess_IdAndActiveTrue(Long userId);
-    
-    
-
+  @Lock(LockModeType.PESSIMISTIC_WRITE)
+  @Query("select l from Lease l where l.id=:id")
+  Optional<Lease> lockById(Long id);
 }

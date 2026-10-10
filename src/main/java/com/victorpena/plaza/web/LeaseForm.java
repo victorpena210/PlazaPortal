@@ -4,69 +4,104 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 public class LeaseForm {
-	
-	private String tenantName;
+  private Long officeId;
+  private String tenantName;
+  private String tenantEmail;
+  private BigDecimal monthlyRent;
+  private LocalDate startDate;
+  private LocalDate endDate;
+  private int dueDay = 1;
+  private boolean prorateFirstMonth;
+  private int graceDays;
+  private BigDecimal lateFee = BigDecimal.ZERO;
 
-	private String tenantEmail;
-	
-	private Long officeId;
-	
-	private BigDecimal monthlyRent;
-	
-	private LocalDate startDate;
-	
-	private LocalDate endDate;
+  public Long getOfficeId() {
+    return officeId;
+  }
 
-	public String getTenantName() {
-		return tenantName;
-	}
+  public void setOfficeId(Long v) {
+    officeId = v;
+  }
 
-	public void setTenantName(String tenantName) {
-		this.tenantName = tenantName;
-	}
+  public String getTenantName() {
+    return tenantName;
+  }
 
-	public String getTenantEmail() {
-		return tenantEmail;
-	}
+  public void setTenantName(String v) {
+    tenantName = v;
+  }
 
-	public void setTenantEmail(String tenantEmail) {
-		this.tenantEmail = tenantEmail;
-	}
+  public String getTenantEmail() {
+    return tenantEmail;
+  }
 
-	public Long getOfficeId() {
-		return officeId;
-	}
+  public void setTenantEmail(String v) {
+    tenantEmail = v;
+  }
 
-	public void setOfficeId(Long officeId) {
-		this.officeId = officeId;
-	}
+  public BigDecimal getMonthlyRent() {
+    return monthlyRent;
+  }
 
-	public BigDecimal getMonthlyRent() {
-		return monthlyRent;
-	}
+  public void setMonthlyRent(BigDecimal v) {
+    monthlyRent = v;
+  }
 
-	public void setMonthlyRent(BigDecimal monthlyRent) {
-		this.monthlyRent = monthlyRent;
-	}
+  public LocalDate getStartDate() {
+    return startDate;
+  }
 
-	public LocalDate getStartDate() {
-		return startDate;
-	}
+  public void setStartDate(LocalDate v) {
+    startDate = v;
+  }
 
-	public void setStartDate(LocalDate startDate) {
-		this.startDate = startDate;
-	}
+  public LocalDate getEndDate() {
+    return endDate;
+  }
 
-	public LocalDate getEndDate() {
-		return endDate;
-	}
+  public void setEndDate(LocalDate v) {
+    endDate = v;
+  }
 
-	public void setEndDate(LocalDate endDate) {
-		this.endDate = endDate;
-	}
-	
-	
-	
-	
+  public int getDueDay() {
+    return dueDay;
+  }
 
+  public void setDueDay(int v) {
+    dueDay = v;
+  }
+
+  public boolean isProrateFirstMonth() {
+    return prorateFirstMonth;
+  }
+
+  public void setProrateFirstMonth(boolean v) {
+    prorateFirstMonth = v;
+  }
+
+  public int getGraceDays() {
+    return graceDays;
+  }
+
+  public void setGraceDays(int v) {
+    graceDays = v;
+  }
+
+  public BigDecimal getLateFee() {
+    return lateFee;
+  }
+
+  public void setLateFee(BigDecimal v) {
+    lateFee = v;
+  }
+
+  private LocalDate billingStartDate;
+
+  public LocalDate getBillingStartDate() {
+    return billingStartDate;
+  }
+
+  public void setBillingStartDate(LocalDate value) {
+    this.billingStartDate = value;
+  }
 }

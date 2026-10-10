@@ -1,82 +1,78 @@
 package com.victorpena.plaza.model;
 
-import java.math.BigDecimal;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import java.time.*;
 
 @Entity
-@Table(name = "offices")
+@Table(
+    name = "offices",
+    uniqueConstraints = @UniqueConstraint(columnNames = {"property_id", "office_number"}))
 public class Office {
-	
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private long id;
-	
-	@Column(name = "office_number", nullable = false, unique = true)
-	private String officeNumber;
-	
-	@Column(name = "square_feet")
-	private Integer squareFeet;
-	
-	
-	@Enumerated(EnumType.STRING)
-	@Column(nullable = false)
-	private OfficeStatus status;
-	
-	@Column(length = 255)
-	private String description;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-	
-	public Office() {
-		
-	}
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "property_id", nullable = false)
+  private Property property;
 
-	public long getId() {
-		return id;
-	}
+  @Column(nullable = false, length = 20)
+  private String officeNumber;
 
-	public void setId(long id) {
-		this.id = id;
-	}
+  private Integer squareFeet;
 
-	public String getOfficeNumber() {
-		return officeNumber;
-	}
+  @Enumerated(EnumType.STRING)
+  @Column(nullable = false, length = 20)
+  private OfficeStatus status = OfficeStatus.AVAILABLE;
 
-	public void setOfficeNumber(String officeNumber) {
-		this.officeNumber = officeNumber;
-	}
+  @Column(length = 255)
+  private String description;
 
-	public Integer getSquareFeet() {
-		return squareFeet;
-	}
+  public Long getId() {
+    return id;
+  }
 
-	public void setSquareFeet(Integer squareFeet) {
-		this.squareFeet = squareFeet;
-	}
+  public void setId(Long value) {
+    this.id = value;
+  }
 
+  public Property getProperty() {
+    return property;
+  }
 
-	public OfficeStatus getStatus() {
-		return status;
-	}
+  public void setProperty(Property value) {
+    this.property = value;
+  }
 
-	public void setStatus(OfficeStatus status) {
-		this.status = status;
-	}
+  public String getOfficeNumber() {
+    return officeNumber;
+  }
 
-	public String getDescription() {
-		return description;
-	}
+  public void setOfficeNumber(String value) {
+    this.officeNumber = value;
+  }
 
-	public void setDescription(String description) {
-		this.description = description;
-	}
-	
+  public Integer getSquareFeet() {
+    return squareFeet;
+  }
+
+  public void setSquareFeet(Integer value) {
+    this.squareFeet = value;
+  }
+
+  public OfficeStatus getStatus() {
+    return status;
+  }
+
+  public void setStatus(OfficeStatus value) {
+    this.status = value;
+  }
+
+  public String getDescription() {
+    return description;
+  }
+
+  public void setDescription(String value) {
+    this.description = value;
+  }
 }

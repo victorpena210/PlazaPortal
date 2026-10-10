@@ -1,10 +1,9 @@
 package com.victorpena.plaza.model;
 
 public enum InvoiceStatus {
-
-	PENDING,
-	PAID,
-	OVERDUE,
-	VOID
-	
+  PENDING,
+  PARTIALLY_PAID,
+  PAID,
+  OVERDUE,
+  VOID
 }
